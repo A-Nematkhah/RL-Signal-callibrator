@@ -8,13 +8,29 @@ distances (task criteria, pooled actions, feature energy) are the on-policy coun
 
 from __future__ import annotations
 import hashlib
+import json
 import numpy as np
 
 _CACHE = {}
 
 
+def _adapter_cache_key(adapter, n_states, seed_base, stride, max_scenarios):
+    """Stable key for the probe-state cache. Must NOT use id(adapter): CPython may recycle ids after GC and a stale
+    entry would then be returned for a different adapter."""
+    attrs = {k: v for k, v in vars(adapter).items() if not k.startswith("_") and not callable(v)}
+    spec = {
+        "type": f"{type(adapter).__module__}.{type(adapter).__qualname__}",
+        "attrs": attrs,
+        "n_states": int(n_states),
+        "seed_base": int(seed_base),
+        "stride": int(stride),
+        "max_scenarios": int(max_scenarios),
+    }
+    return hashlib.sha1(json.dumps(spec, sort_keys=True, default=str).encode()).hexdigest()
+
+
 def build_probe_states(adapter, n_states=64, seed_base=20000, stride=3, max_scenarios=200):
-    key = (id(adapter), n_states, seed_base, stride)
+    key = _adapter_cache_key(adapter, n_states, seed_base, stride, max_scenarios)
     if key in _CACHE:
         return _CACHE[key]
     env = adapter.make_env({})

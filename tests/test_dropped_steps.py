@@ -1,6 +1,6 @@
 """Missing checkpoints must be listed, not silently dropped from the estimator's budget grid."""
 
-from rlsignal.data import FeatureSpace, RunData
+from rlsignal.data import FeatureSpace
 from rlsignal.estimator import estimate_budget
 from rlsignal.params import EstimatorParams
 from rlsignal.validation.synthetic import make_estimator_runs
