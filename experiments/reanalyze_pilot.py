@@ -7,13 +7,14 @@ Usage: python experiments/reanalyze_pilot.py [results_dir] [out_dir]"""
 import json
 import shutil
 import sys
+import tempfile
 from pathlib import Path
-import yaml
 from rlsignal.analyze import analyze_experiment
+from rlsignal.config import load_config
 
 src = Path(sys.argv[1] if len(sys.argv) > 1 else "results/crowdnav_pilot_v2")
 out = Path(sys.argv[2] if len(sys.argv) > 2 else "experiments/pilot_v2_reanalysis")
-cfg = yaml.safe_load(open("configs/crowdnav_pilot.yaml"))
+cfg = load_config("configs/crowdnav_pilot.yaml")
 VARIANTS = {
     "pareto_success_collision": cfg["estimator"],
     "success_only": {**cfg["estimator"], "rule": "single",
@@ -25,10 +26,10 @@ VARIANTS = {
                                 "criteria": [{"name": "success", "source": "metric", "key": "success", "direction": "higher"}]},
 }
 for name, est in VARIANTS.items():
-    work = Path("/tmp") / f"reanalysis_{name}"
+    work = Path(tempfile.gettempdir()) / f"reanalysis_{name}"
     if work.exists():
         shutil.rmtree(work)
-    work.mkdir()
+    work.mkdir(parents=True)
     for f in ("manifest.json",):
         shutil.copy(src / f, work / f)
     shutil.copytree(src / "runs", work / "runs", ignore=shutil.ignore_patterns("model.zip"))
@@ -37,7 +38,7 @@ for name, est in VARIANTS.items():
     dest.mkdir(parents=True, exist_ok=True)
     shutil.copy(work / "analysis.json", dest / "analysis.json")
     shutil.copy(work / "report.md", dest / "report.md")
-    (dest / "estimator.json").write_text(json.dumps(res["estimator"], indent=2, default=str))
+    (dest / "estimator.json").write_text(json.dumps(res["estimator"], indent=2, default=str), encoding="utf-8")
     d = res["estimator"]["decision"]
     print(f"{name}: {d['status']} min={d['minimum_reliable_budget']} rec={d['recommended_budget']} "
           f"provisional={d.get('provisional_budget_if_reference_were_trusted')}")

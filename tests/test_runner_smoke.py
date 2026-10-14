@@ -70,10 +70,13 @@ class DummyTrainer(Trainer):
             self.sample_rng = old
 
     def save(self, path):
-        open(path, "w").write(json.dumps({"logit": self.logit, "n": self.n}))
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(json.dumps({"logit": self.logit, "n": self.n}))
 
     def load(self, path):
-        d = json.loads(open(path).read()); self.logit, self.n = d["logit"], d["n"]
+        with open(path, encoding="utf-8") as f:
+            d = json.loads(f.read())
+        self.logit, self.n = d["logit"], d["n"]
 
 
 @pytest.fixture(autouse=True)
@@ -97,7 +100,7 @@ def test_run_resume_guard_and_matched_null_layout(tmp_path):
     exp, done = run_experiment(cfg, tmp_path, log=lambda *_: None)
     assert done
     f = exp / "runs" / "good" / "seed0" / "evals.jsonl"
-    recs = [json.loads(l) for l in f.read_text().splitlines()]
+    recs = [json.loads(l) for l in f.read_text(encoding="utf-8").splitlines()]
     assert [(r["checkpoint"], r["eval_set"], r["null_idx"]) for r in recs] == \
         [(0, "E", None), (0, "null", 0), (0, "null", 1), (0, "null", 2), (64, "E", None), (128, "E", None), (256, "E", None)]
     # matched null: same env seeds as E, so that E[0] and null sets differ only by action sampling
@@ -105,7 +108,7 @@ def test_run_resume_guard_and_matched_null_layout(tmp_path):
     assert recs[1]["episodes"] != recs[2]["episodes"]                       # different sampling streams
     cfg["schedule"]["checkpoints"] = [64, 128, 256, 384]                    # extending the grid resumes
     run_experiment(cfg, tmp_path, log=lambda *_: None)
-    assert [r["checkpoint"] for r in map(json.loads, f.read_text().splitlines())] == [0, 0, 0, 0, 64, 128, 256, 384]
+    assert [r["checkpoint"] for r in map(json.loads, f.read_text(encoding="utf-8").splitlines())] == [0, 0, 0, 0, 64, 128, 256, 384]
     cfg["algo"]["hyperparams"]["gamma"] = 0.5                               # incompatible config is refused
     with pytest.raises(IncompatibleConfigError):
         run_experiment(cfg, tmp_path, log=lambda *_: None)
@@ -130,4 +133,4 @@ def test_pi0_is_identical_across_rewards_and_analysis_runs(tmp_path):
     res = analyze_experiment(exp)
     assert res["calibration"]["n_null_independent_seeds"] == 4
     assert (exp / "report.md").exists()
-    assert "crowdnav_path" not in (exp / "report.md").read_text()           # no machine path leaks into the report
+    assert "crowdnav_path" not in (exp / "report.md").read_text(encoding="utf-8")           # no machine path leaks into the report

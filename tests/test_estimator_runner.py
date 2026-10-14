@@ -35,7 +35,7 @@ def test_reference_eval_probe_and_snapshots_are_recorded(tmp_path):
     exp, done = run_experiment(cfg1(), tmp_path, log=lambda *_: None)
     assert done
     rdir = exp / "runs" / "good" / "seed0"
-    recs = [json.loads(l) for l in (rdir / "evals.jsonl").read_text().splitlines()]
+    recs = [json.loads(l) for l in (rdir / "evals.jsonl").read_text(encoding="utf-8").splitlines()]
     R = [r for r in recs if r["eval_set"] == "R"]
     assert [r["checkpoint"] for r in R] == [256]                                   # only at the reference budget
     assert [e["seed"] for e in R[0]["episodes"]] == list(range(900, 912))           # larger, DISJOINT scenario set
@@ -60,7 +60,7 @@ def test_refine_evaluates_snapshots_without_touching_the_training_run(tmp_path):
     assert {96, 192} <= set(runs["good"][0].eval_E) and {96, 192} <= set(runs["good"][0].probe)
     assert refine_experiment(cfg, tmp_path, [96, 192], log=lambda *_: None)["evaluated"] == 0   # idempotent
     # the refined evaluation is of the snapshot, i.e. of the model at THAT budget
-    rec = [json.loads(l) for l in (exp / "runs" / "good" / "seed0" / "evals.jsonl").read_text().splitlines()
+    rec = [json.loads(l) for l in (exp / "runs" / "good" / "seed0" / "evals.jsonl").read_text(encoding="utf-8").splitlines()
            if json.loads(l)["checkpoint"] == 96][0]
     assert rec["transitions"] == 96 and rec["refined_from_snapshot"]
 
@@ -72,7 +72,7 @@ def test_budget_behind_the_trained_frontier_is_skipped_not_mislabelled(tmp_path)
     msgs = []
     run_experiment(cfg, tmp_path, log=msgs.append)
     f = tmp_path / "toy" / "runs" / "good" / "seed0" / "evals.jsonl"
-    assert 96 not in [json.loads(l)["checkpoint"] for l in f.read_text().splitlines()]
+    assert 96 not in [json.loads(l)["checkpoint"] for l in f.read_text(encoding="utf-8").splitlines()]
     assert any("behind the trained frontier" in m for m in msgs)
 
 
@@ -97,6 +97,6 @@ def test_analyze_experiment_writes_estimator_section_and_explicit_outcome(tmp_pa
     res = analyze_experiment(exp, estimator_cfg=est, budget_cfg={"mode": "estimator"})
     assert res["estimator"]["decision"]["status"] == "insufficient_seeds"           # 2 seeds: explicit, not a number
     assert res["budget"]["recommended_stage2_steps"] is None and res["budget"]["status"] == "insufficient_seeds"
-    text = (exp / "report.md").read_text()
+    text = (exp / "report.md").read_text(encoding="utf-8")
     assert "Reference-based budget estimator" in text and "insufficient_seeds" in text
-    json.loads((exp / "analysis.json").read_text())                                 # serialisable end to end
+    json.loads((exp / "analysis.json").read_text(encoding="utf-8"))                                 # serialisable end to end
