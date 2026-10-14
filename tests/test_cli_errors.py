@@ -91,3 +91,72 @@ def test_refine_without_snapshot_grid_exits_2(tmp_path, capsys):
     (exp / "manifest.json").write_text(json.dumps({"name": "toy"}), encoding="utf-8")
     code, out = _run(["refine", str(cfg), "--out", str(tmp_path)], capsys)
     assert code == 2 and "snapshot" in out.err.lower() and "Traceback" not in out.err
+
+
+def test_run_new_opens_a_fresh_timestamped_folder(tmp_path, monkeypatch, capsys):
+    """`--new` must not resume into results/<name>/; each call gets its own directory under --out."""
+    from pathlib import Path
+
+    from rlsignal import runner
+
+    cfg = _cfg(tmp_path)
+    old = tmp_path / "toy"
+    old.mkdir()
+    (old / "manifest.json").write_text(json.dumps({"name": "toy"}), encoding="utf-8")
+    seen = []
+
+    def fake_run(c, out, force=False):
+        seen.append(c["name"])
+        exp = Path(out) / c["name"]
+        exp.mkdir(parents=True, exist_ok=True)
+        (exp / "manifest.json").write_text(json.dumps({"name": c["name"]}), encoding="utf-8")
+        return exp, True
+
+    monkeypatch.setattr(runner, "run_experiment", fake_run)
+    cli.main(["run", str(cfg), "--out", str(tmp_path), "--new"])
+    name = seen[0]
+    assert name.startswith("toy_") and name != "toy"
+    assert (tmp_path / name / "manifest.json").exists()
+    assert "experiment dir:" in capsys.readouterr().out
+    # a second --new call must not reuse that folder either
+    cli.main(["run", str(cfg), "--out", str(tmp_path), "--new"])
+    assert seen[1] != seen[0] and seen[1].startswith("toy_")
+
+
+def test_all_new_analyzes_the_same_fresh_folder(tmp_path, monkeypatch):
+    from pathlib import Path
+
+    from rlsignal import analyze, runner
+
+    cfg = _cfg(tmp_path)
+    analyzed = {}
+
+    def fake_run(c, out, force=False):
+        exp = Path(out) / c["name"]
+        exp.mkdir(parents=True, exist_ok=True)
+        (exp / "manifest.json").write_text(json.dumps({"name": c["name"]}), encoding="utf-8")
+        return exp, True
+
+    def fake_analyze(exp, **kw):
+        analyzed["exp"] = Path(exp)
+        return {}
+
+    monkeypatch.setattr(runner, "run_experiment", fake_run)
+    monkeypatch.setattr(analyze, "analyze_experiment", fake_analyze)
+    cli.main(["all", str(cfg), "--out", str(tmp_path), "--new"])
+    assert analyzed["exp"].name.startswith("toy_")
+    assert (analyzed["exp"] / "manifest.json").exists()
+
+
+def test_analyze_exp_points_at_a_specific_folder(tmp_path, monkeypatch, capsys):
+    from rlsignal import analyze
+
+    cfg = _cfg(tmp_path)
+    stamped = tmp_path / "toy_20260101_120000"
+    stamped.mkdir()
+    (stamped / "manifest.json").write_text(json.dumps({"name": stamped.name}), encoding="utf-8")
+    seen = {}
+    monkeypatch.setattr(analyze, "analyze_experiment", lambda exp, **kw: seen.setdefault("exp", exp) or {})
+    cli.main(["analyze", str(cfg), "--out", str(tmp_path), "--exp", str(stamped)])
+    assert seen["exp"] == stamped
+    assert f"report: {stamped / 'report.md'}" in capsys.readouterr().out

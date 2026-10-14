@@ -34,6 +34,9 @@ Every command takes `<config.yaml>` plus `--out <results root>` (default `result
 | `validate` | evaluates a hold-out experiment against its pre-registration |
 
 `--force` quarantines old runs when the compatibility hash changed (`run`) or overwrites a registration (`preregister`).
+`run` / `all` accept `--new`: write under `<out>/<name>_<YYYYMMDD_HHMMSS>/` instead of resuming
+`<out>/<name>/`. Print the path (`experiment dir: ...`) and pass it to later commands with
+`--exp <that path>` on `analyze` / `estimate` / `refine` (or use `all --new`, which analyses the same folder).
 
 ## Configuration
 Top-level sections: `name`, `adapter`, `rewards`, `algo`, `eval`, `schedule`, `compute`, `features`, `detection`,

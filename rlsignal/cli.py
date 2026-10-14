@@ -1,6 +1,7 @@
 import argparse
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 from .config import load_config
@@ -11,8 +12,20 @@ def _die(msg: str) -> None:
     raise SystemExit(2)
 
 
-def _require_experiment(cfg, out) -> Path:
-    exp = Path(out) / cfg["name"]
+def unique_experiment_name(base: str, out_root) -> str:
+    """Return `<base>_<YYYYMMDD_HHMMSS>` under out_root, appending `_2`, `_3`, ... if that folder already exists."""
+    root = Path(out_root)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    name = f"{base}_{stamp}"
+    n = 1
+    while (root / name).exists():
+        n += 1
+        name = f"{base}_{stamp}_{n}"
+    return name
+
+
+def _require_experiment(cfg, out, exp_path=None) -> Path:
+    exp = Path(exp_path) if exp_path else Path(out) / cfg["name"]
     if not (exp / "manifest.json").exists():
         _die(f"experiment directory not found or incomplete: {exp} (run `rlsignal run` first)")
     return exp
@@ -33,6 +46,18 @@ def main(argv=None):
         p.add_argument("config")
         p.add_argument("--out", default="results")
         p.add_argument("--force", action="store_true")
+        if name in ("run", "all"):
+            p.add_argument(
+                "--new",
+                action="store_true",
+                help="write this run under <out>/<name>_<timestamp>/ so it does not resume or overwrite a previous run",
+            )
+        if name in ("analyze", "estimate", "refine"):
+            p.add_argument(
+                "--exp",
+                default=None,
+                help="experiment directory (default: <out>/<name>); use after `run --new`",
+            )
     a = ap.parse_args(argv)
     try:
         cfg = load_config(a.config)
@@ -46,6 +71,8 @@ def main(argv=None):
     if a.cmd in ("run", "all"):
         from .runner import run_experiment
 
+        if a.new:
+            cfg["name"] = unique_experiment_name(cfg["name"], a.out)
         exp, complete = run_experiment(cfg, a.out, force=a.force)
         print(f"experiment dir: {exp} complete={complete}")
     if a.cmd == "preregister":
@@ -63,7 +90,7 @@ def main(argv=None):
     if a.cmd == "estimate":
         from .analyze import analyze_experiment
 
-        exp = _require_experiment(cfg, a.out)
+        exp = _require_experiment(cfg, a.out, a.exp)
         est_cfg = _require_estimator(cfg)
         try:
             res = analyze_experiment(exp, estimator_cfg=est_cfg, budget_cfg=cfg.get("budget"))
@@ -77,7 +104,10 @@ def main(argv=None):
         from .params import EstimatorParams
         from .runner import refine_experiment, snapshot_steps
 
-        exp = _require_experiment(cfg, a.out)
+        exp = _require_experiment(cfg, a.out, a.exp)
+        # refine_experiment looks up runs under <out>/<cfg name>; keep it aligned with --exp
+        cfg["name"] = exp.name
+        a.out = str(exp.parent)
         est_cfg = _require_estimator(cfg)
         snaps = cfg["schedule"].get("snapshot_grid") or []
         if not snaps and not cfg["schedule"].get("keep_snapshots"):
@@ -110,7 +140,7 @@ def main(argv=None):
     if a.cmd in ("analyze", "all"):
         from .analyze import analyze_experiment
 
-        exp = _require_experiment(cfg, a.out)
+        exp = _require_experiment(cfg, a.out, getattr(a, "exp", None))
         try:
             analyze_experiment(exp, estimator_cfg=cfg.get("estimator"), budget_cfg=cfg.get("budget"))
         except Exception as e:  # noqa: BLE001
