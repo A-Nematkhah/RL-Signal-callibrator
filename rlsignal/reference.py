@@ -14,20 +14,15 @@ from __future__ import annotations
 import itertools
 import numpy as np
 from .behavior import _marginal_dist, _probe_dist
-from .metrics import episode_value
-
-
-def _vals(eps, c):
-    return np.array([episode_value(e, c) for e in eps])
+from .metrics import episode_values
 
 
 def assess_references(runs, rewards, controls, steps, ref_step, criteria, action_kind, P):
     c0 = criteria[0]                                    # primary criterion drives the task-performance checks
-    rng = np.random.default_rng(P.seed + 53)
     out, ctrl_vals = {}, {}
     src = lambda r: (r.eval_R[ref_step] if ref_step in r.eval_R else r.eval_E[ref_step])
     for rid in list(controls):
-        ctrl_vals[rid] = np.array([_vals(src(r), c0).mean() for r in runs[rid].values()])
+        ctrl_vals[rid] = np.array([episode_values(src(r), c0).mean() for r in runs[rid].values()])
     prev = [t for t in steps if t < ref_step]
     t_prev = min(prev, key=lambda t: abs(t - P.ref_trend_fraction * ref_step)) if prev else None
     for rid in rewards:
@@ -35,8 +30,8 @@ def assess_references(runs, rewards, controls, steps, ref_step, criteria, action
         rs = [runs[rid][s] for s in seeds]
         e = {"n_seeds": len(seeds), "reference_step": int(ref_step), "primary_criterion": c0.name, "reasons": [],
              "performance_reasons": [], "behavior_reasons": []}
-        v = np.array([_vals(src(r), c0).mean() for r in rs])
-        se = float(np.mean([_vals(src(r), c0).std(ddof=1) / np.sqrt(len(src(r))) for r in rs]))
+        v = np.array([episode_values(src(r), c0).mean() for r in rs])
+        se = float(np.mean([episode_values(src(r), c0).std(ddof=1) / np.sqrt(len(src(r))) for r in rs]))
         e["primary_by_seed"] = v.tolist()
         e["primary_mean"] = float(v.mean())
         if len(seeds) < 2:
@@ -59,7 +54,7 @@ def assess_references(runs, rewards, controls, steps, ref_step, criteria, action
             if js > P.ref_max_probe_js:
                 e["behavior_reasons"].append(f"reference behaviours differ across seeds: mean JS {js:.3f} bits > {P.ref_max_probe_js}")
         if t_prev is not None and len(seeds) >= 2 and all(t_prev in r.eval_E for r in rs):
-            d = np.array([_vals(r.eval_E[ref_step], c0).mean() - _vals(r.eval_E[t_prev], c0).mean() for r in rs])
+            d = np.array([episode_values(r.eval_E[ref_step], c0).mean() - episode_values(r.eval_E[t_prev], c0).mean() for r in rs])
             from scipy.stats import t as student_t      # small-sample interval: a percentile bootstrap over ~8 seeds is too narrow
             # Bonferroni over the audited rewards: one drift test per reward must not flag a reference by chance
             half = student_t.ppf(1 - 0.025 / max(len(rewards), 1), len(d) - 1) * d.std(ddof=1) / np.sqrt(len(d))

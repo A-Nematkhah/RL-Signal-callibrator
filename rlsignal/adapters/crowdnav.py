@@ -61,7 +61,7 @@ def _import_crowd_sim(path):
 
 class _RobotPolicy:
     """CrowdSim.reset() reads these attributes from robot.policy; the RL agent supplies the actions."""
-    multiagent_training = True
+    multiagent_training = True      # read by CrowdSim.reset() to decide how many humans to spawn
     kinematics = None
 
     def __init__(self, kinematics):
@@ -70,7 +70,7 @@ class _RobotPolicy:
 
 
 class CrowdNavGymEnv(gym.Env):
-    metadata = {"render_modes": []}
+    metadata = {"render_modes": []}     # gymnasium.Env contract
 
     def __init__(self, weights, crowdnav_path=None, env_config=None, kinematics="holonomic", n_speeds=5,
                  n_rotations=16, rotation_constraint=np.pi / 3, obs_mode="ego"):
@@ -98,7 +98,7 @@ class CrowdNavGymEnv(gym.Env):
             self._actions = [self._Rot(0.0, 0.0)] + [self._Rot(s, r) for s in speeds for r in rots]
         self.action_space = spaces.Discrete(len(self._actions))
         n = 5 + 5 * self.sim.human_num
-        self.observation_space = spaces.Box(-np.inf, np.inf, (n,), np.float32)
+        self.observation_space = spaces.Box(-np.inf, np.inf, (n,), np.float32)   # used by SB3 to build the policy
         self._rng = np.random.default_rng(0)
         self._noise_rng = np.random.default_rng(1)
         self._dg = 0.0
@@ -141,7 +141,7 @@ class CrowdNavGymEnv(gym.Env):
         return self._XY(c * act.vx - s * act.vy, s * act.vx + c * act.vy)
 
     # ---- gymnasium API
-    def reset(self, *, seed=None, options=None):
+    def reset(self, *, seed=None, options=None):    # `options` is part of the gymnasium signature (unused here)
         if seed is None:
             seed = int(self._rng.integers(0, 2 ** 30))
         else:

@@ -72,11 +72,6 @@ def js_divergence(p, q):
     return float(jensenshannon(p, q, base=2) ** 2)
 
 
-def total_variation(p, q):
-    p, q = np.asarray(p, float), np.asarray(q, float)
-    return float(0.5 * np.abs(p / max(p.sum(), 1e-12) - q / max(q.sum(), 1e-12)).sum())
-
-
 def best_split(x):
     """Single change point minimising two-segment SSE. Returns (k, mean_after - mean_before);
     segment 2 starts at index k. None if len(x) < 2."""

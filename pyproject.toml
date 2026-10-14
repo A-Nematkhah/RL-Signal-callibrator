@@ -26,5 +26,9 @@ select = ["F", "E9", "B", "UP", "SIM", "PLE", "PLW"]
 # SIM300 misreads single-letter uppercase math names (S, C, T) as constants ("Yoda conditions").
 ignore = ["E501", "SIM108", "UP007", "B905", "SIM300"]
 
+[tool.ruff.lint.per-file-ignores]
+# `make_runs` is frozen (existing tests depend on its RNG stream); its closures are called within their own iteration.
+"rlsignal/validation/synthetic.py" = ["B023"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

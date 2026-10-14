@@ -1,5 +1,5 @@
 import numpy as np
-from rlsignal.stats import bh_adjust, best_split, js_divergence, permutation_energy_test, total_variation
+from rlsignal.stats import bh_adjust, best_split, js_divergence, permutation_energy_test
 
 
 def test_permutation_null_is_calibrated():
@@ -22,7 +22,7 @@ def test_bh_monotone_and_bounded():
 
 def test_divergences():
     assert js_divergence([1, 0], [1, 0]) == 0
-    assert abs(total_variation([1, 0], [0, 1]) - 1) < 1e-12
+    assert abs(js_divergence([1, 0], [0, 1]) - 1) < 1e-12
 
 
 def test_best_split():

@@ -21,7 +21,7 @@ import itertools
 import numpy as np
 from scipy.spatial.distance import jensenshannon
 from .detectors import first_persistent
-from .metrics import episode_value
+from .metrics import episode_values
 from .stats import energy_distance, js_divergence
 
 
@@ -94,8 +94,8 @@ class BehaviorDistances:
         if metric == "feature_energy":
             return energy_distance(self._feat(ra, sa, ta), self._feat(rb, sb, tb))
         if metric == "task_gap":
-            return float(max(abs(np.mean([episode_value(e, c) for e in A.eval_E[ta]]) -
-                                 np.mean([episode_value(e, c) for e in B.eval_E[tb]])) for c in self.criteria))
+            return float(max(abs(np.mean(episode_values(A.eval_E[ta], c)) -
+                                 np.mean(episode_values(B.eval_E[tb], c))) for c in self.criteria))
         raise ValueError(metric)
 
 
@@ -107,7 +107,7 @@ def _boot_mean_ci(x, B, level, rng):
     return float(x.mean()), [float(np.quantile(m, a)), float(np.quantile(m, 1 - a))]
 
 
-def behavioral_convergence(runs, rewards, steps, ref_step, fs, criteria, action_kind, P, seeds_by_reward=None,
+def behavioral_convergence(runs, rewards, steps, ref_step, fs, criteria, action_kind, P,
                            n_boot=500, persist_k=2, persist_ratio=2.0):
     """Per reward: distance-to-own-reference curves with seed-level bootstrap CIs, threshold, onset and status."""
     D = BehaviorDistances(runs, fs, criteria, action_kind)
@@ -115,7 +115,7 @@ def behavioral_convergence(runs, rewards, steps, ref_step, fs, criteria, action_
     eval_steps = [t for t in steps if t < ref_step]       # at the reference itself the lineage distance is 0 by construction
     out = {}
     for rid in rewards:
-        seeds = sorted(runs[rid]) if seeds_by_reward is None else seeds_by_reward[rid]
+        seeds = sorted(runs[rid])
         entry = {"n_seeds": len(seeds), "steps": eval_steps, "metrics": {}, "stabilization": {}}
         metrics = [m for m in P.behavior_metrics if m in D.available(rid, seeds, eval_steps, ref_step)]
         entry["unavailable_metrics"] = [m for m in P.behavior_metrics if m not in metrics]

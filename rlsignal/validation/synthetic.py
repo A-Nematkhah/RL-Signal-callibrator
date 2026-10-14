@@ -59,6 +59,35 @@ def _ramp(t, onset, ramp):
     return 0.0 if t < onset else float(min(1.0, (t - onset) / max(ramp, 1)))
 
 
+def _beh_ramp(t, sp):
+    return _ramp(t, sp.get("beh_onset", sp.get("onset", 0)), sp.get("beh_ramp", sp.get("ramp", 1)))
+
+
+def _estimator_episodes(rng, sp, pf, target, ref_step, t, n):
+    a = _ramp(t, sp.get("onset", 0), sp.get("ramp", 1))
+    p_succ = float(np.clip(pf * a + sp.get("drift", 0.0) * min(t / ref_step, 1.0), 0, 1))
+    p_col = float(np.clip(sp.get("coll_final", 0.1) * (1 - 0.5 * a), 0, 1))
+    pa = np.exp(_beh_ramp(t, sp) * target)
+    pa /= pa.sum()
+    out = []
+    for _ in range(n):
+        L = int(max(3, rng.poisson(25)))
+        succ = float(rng.random() < p_succ)
+        col = float((not succ) and rng.random() < p_col)
+        out.append({"return": float(rng.normal(sp.get("ret_final", 0.0) * a, 1.0)), "length": L,
+                    "terminated": bool(succ or col), "truncated": False,
+                    "action_summary": {"counts": rng.multinomial(L, pa).tolist()},
+                    "metrics": {"success": succ, "collision": col},
+                    "reward_components": {"success": succ, "collision": col}, "seed": len(out)})
+    return out
+
+
+def _estimator_probe(sp, logits0, jit, target, t):
+    z = logits0 + jit + _beh_ramp(t, sp) * target[None, :]
+    p = np.exp(z - z.max(1, keepdims=True))
+    return (p / p.sum(1, keepdims=True)).astype(np.float32)
+
+
 def make_estimator_runs(specs, steps, n_seeds=8, n_eps=30, n_ref_eps=200, ref_step=None, seed=0, n_actions=5,
                         n_probe=16, n_null=2):
     """specs[reward] keys: p_final (final success prob), onset/ramp (task-quality curve), beh_onset/beh_ramp
@@ -80,31 +109,9 @@ def make_estimator_runs(specs, steps, n_seeds=8, n_eps=30, n_ref_eps=200, ref_st
             else:
                 pf = float(np.clip(pf + rng.normal(0, sp.get("seed_sd", 0.02)), 0, 1))
             jit = rng.normal(0, 0.3, size=(n_probe, n_actions))
-
-            def eps_at(t, n):
-                a = _ramp(t, sp.get("onset", 0), sp.get("ramp", 1))
-                p_succ = float(np.clip(pf * a + sp.get("drift", 0.0) * min(t / ref_step, 1.0), 0, 1))
-                p_col = float(np.clip(sp.get("coll_final", 0.1) * (1 - 0.5 * a), 0, 1))
-                b = _ramp(t, sp.get("beh_onset", sp.get("onset", 0)), sp.get("beh_ramp", sp.get("ramp", 1)))
-                pa = np.exp(b * target); pa /= pa.sum()
-                out = []
-                for _ in range(n):
-                    L = int(max(3, rng.poisson(25)))
-                    succ = float(rng.random() < p_succ)
-                    col = float((not succ) and rng.random() < p_col)
-                    out.append({"return": float(rng.normal(sp.get("ret_final", 0.0) * a, 1.0)), "length": L,
-                                "terminated": bool(succ or col), "truncated": False,
-                                "action_summary": {"counts": rng.multinomial(L, pa).tolist()},
-                                "metrics": {"success": succ, "collision": col},
-                                "reward_components": {"success": succ, "collision": col}, "seed": len(out)})
-                return out
-
-            def probe_at(t):
-                b = _ramp(t, sp.get("beh_onset", sp.get("onset", 0)), sp.get("beh_ramp", sp.get("ramp", 1)))
-                z = logits0 + jit + b * target[None, :]
-                p = np.exp(z - z.max(1, keepdims=True)); return (p / p.sum(1, keepdims=True)).astype(np.float32)
-            E = {t: eps_at(t, n_eps) for t in [0] + list(steps)}
-            nulls = [eps_at(0, n_eps) for _ in range(n_null)]
-            R = {ref_step: eps_at(ref_step, n_ref_eps)}
-            runs[rid][s] = RunData(rid, s, E, nulls, R, {t: probe_at(t) for t in [0] + list(steps)})
+            E = {t: _estimator_episodes(rng, sp, pf, target, ref_step, t, n_eps) for t in [0] + list(steps)}
+            nulls = [_estimator_episodes(rng, sp, pf, target, ref_step, 0, n_eps) for _ in range(n_null)]
+            R = {ref_step: _estimator_episodes(rng, sp, pf, target, ref_step, ref_step, n_ref_eps)}
+            probe = {t: _estimator_probe(sp, logits0, jit, target, t) for t in [0] + list(steps)}
+            runs[rid][s] = RunData(rid, s, E, nulls, R, probe)
     return runs

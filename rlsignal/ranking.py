@@ -76,22 +76,20 @@ def ranking_analysis(runs, steps, cfg, params, candidates):
 # Reference-based ranking reliability (new estimator). `ranking_analysis` above is kept unchanged for
 # backward compatibility (mode "ranking"); its limitations are listed in README ("Estimator v2").
 # =====================================================================================================
-from .metrics import episode_value, rule_scores, tau_b          # noqa: E402
+from .metrics import episode_values, rule_scores, tau_b          # noqa: E402
 
 
 def criterion_tensors(runs, candidates, seeds, steps, ref_step, criteria):
     """V: (M, C, S, T, Ne) per-episode criterion values at the evaluated budgets (episodes are aligned by scenario
     seed, so index e is the same scenario for every policy). VR: (M, C, S, Nr) reference evaluation at ref_step:
     taken from the larger, disjoint scenario set (eval_set "R") when stored, otherwise from E (flag returned)."""
-    def vals(eps, c):
-        return [episode_value(e, c) for e in eps]
     n_e = min(len(runs[c][s].eval_E[t]) for c in candidates for s in seeds for t in steps)
-    V = np.array([[[[vals(runs[c][s].eval_E[t], cr)[:n_e] for t in steps] for s in seeds] for c in candidates]
+    V = np.array([[[[episode_values(runs[c][s].eval_E[t], cr)[:n_e] for t in steps] for s in seeds] for c in candidates]
                   for cr in criteria])
     has_R = all(ref_step in runs[c][s].eval_R for c in candidates for s in seeds)
     src = (lambda c, s: runs[c][s].eval_R[ref_step]) if has_R else (lambda c, s: runs[c][s].eval_E[ref_step])
     n_r = min(len(src(c, s)) for c in candidates for s in seeds)
-    VR = np.array([[[vals(src(c, s), cr)[:n_r] for s in seeds] for c in candidates] for cr in criteria])
+    VR = np.array([[[episode_values(src(c, s), cr)[:n_r] for s in seeds] for c in candidates] for cr in criteria])
     return V, VR, has_R
 
 

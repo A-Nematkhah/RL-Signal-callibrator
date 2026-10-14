@@ -1,5 +1,4 @@
 """Runner / resume / hash / loader / analysis plumbing, with a toy env and a dummy trainer (no torch needed)."""
-import copy
 import json
 from contextlib import contextmanager
 import numpy as np

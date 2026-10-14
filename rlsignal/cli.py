@@ -39,7 +39,6 @@ def main(argv=None):
         return
     if a.cmd == "refine":        # evaluate extra budgets from stored snapshots near the stopping boundary
         from .analyze import analyze_experiment
-        from .config import checkpoint_grid
         from .estimator import suggest_refinement_steps
         from .runner import refine_experiment
         exp = Path(a.out) / cfg["name"]

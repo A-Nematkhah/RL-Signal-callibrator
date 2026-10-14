@@ -25,7 +25,6 @@ class DetectionParams:
     delta_l: float = 0.25          # minimum standardised return change (units of pi_0 return sd)
     n_boot: int = 300
     discrim_alpha: float = 0.05
-    discrim_pair_frac: float = 0.8
     discrim_n_perm: int = 2000
     min_sep_ratio: float = 1.25    # between-group / within-group distance
     discrim_correction: str = "none"   # none | bh

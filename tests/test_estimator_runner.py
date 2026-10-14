@@ -1,6 +1,5 @@
 """Runner plumbing for the estimator: reference evaluation set, probe fingerprints, snapshots, evaluation-only
 refinement, resume correctness, and non-interference of evaluation with the training state (toy env, dummy trainer)."""
-import copy
 import json
 import numpy as np
 import pytest

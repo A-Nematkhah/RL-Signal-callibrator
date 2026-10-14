@@ -16,6 +16,11 @@ def episode_value(ep: dict, c) -> float:
     return float(src[c.key])
 
 
+def episode_values(eps, c) -> np.ndarray:
+    """Per-episode values of criterion `c` over a list of episodes."""
+    return np.array([episode_value(e, c) for e in eps])
+
+
 def available_criteria(runs, criteria):
     """Split criteria into (usable, skipped-with-reason). A missing mandatory criterion is an error, never silently
     dropped: the ranking definition must be what the config says."""
@@ -29,7 +34,7 @@ def available_criteria(runs, criteria):
         except KeyError:
             if not c.optional:
                 raise KeyError(f"mandatory ranking criterion {c.name!r} ({c.source}:{c.key}) is not present in the "
-                               "stored evaluations (mark it optional: true to allow skipping it)")
+                               "stored evaluations (mark it optional: true to allow skipping it)") from None
             skipped.append({"criterion": c.name, "reason": f"{c.source}:{c.key} not stored in these evaluations"})
     if not ok:
         raise ValueError("no usable ranking criterion")

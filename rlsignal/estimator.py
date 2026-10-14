@@ -9,7 +9,6 @@ The recommended budget answers question 3 only, and only if question 4 allows it
 policy is optimal or converged because its budget is large, its curve plateaued, or it resembles a reference.
 """
 from __future__ import annotations
-import numpy as np
 from .behavior import behavioral_convergence
 from .metrics import available_criteria
 from .params import EstimatorParams

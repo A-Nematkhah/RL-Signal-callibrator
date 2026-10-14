@@ -5,10 +5,9 @@ Two kinds of evidence are kept apart on purpose:
   * SYNTHETIC SCENARIOS: planted ground truth (make_estimator_runs). They show the estimator reacts sensibly in the six
     required situations; they are NOT empirical RL results.
 """
-import json
 import numpy as np
 import pytest
-from rlsignal.data import FeatureSpace, load_experiment
+from rlsignal.data import FeatureSpace
 from rlsignal.estimator import estimate_budget, suggest_refinement_steps
 from rlsignal.metrics import available_criteria, pareto_front_index, rule_scores, tau_b
 from rlsignal.params import Criterion, EstimatorParams
