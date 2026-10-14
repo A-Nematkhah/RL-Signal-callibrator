@@ -1,4 +1,5 @@
 """Criterion extraction and ranking rules (environment independent)."""
+
 from __future__ import annotations
 import numpy as np
 from scipy.stats import kendalltau
@@ -33,8 +34,10 @@ def available_criteria(runs, criteria):
             ok.append(c)
         except KeyError:
             if not c.optional:
-                raise KeyError(f"mandatory ranking criterion {c.name!r} ({c.source}:{c.key}) is not present in the "
-                               "stored evaluations (mark it optional: true to allow skipping it)") from None
+                raise KeyError(
+                    f"mandatory ranking criterion {c.name!r} ({c.source}:{c.key}) is not present in the "
+                    "stored evaluations (mark it optional: true to allow skipping it)"
+                ) from None
             skipped.append({"criterion": c.name, "reason": f"{c.source}:{c.key} not stored in these evaluations"})
     if not ok:
         raise ValueError("no usable ranking criterion")
@@ -67,7 +70,7 @@ def pareto_front_index(X, eps=0.0):
     f = 0
     while remaining:
         front = [j for j in remaining if not any(dom[i, j] for i in remaining if i != j)]
-        if not front:                       # numerical safety: cannot happen for a strict partial order
+        if not front:  # numerical safety: cannot happen for a strict partial order
             front = list(remaining)
         for j in front:
             idx[j] = f

@@ -1,4 +1,5 @@
 """Experiment runner: resumable, config-hash guarded, transition-accounted."""
+
 from __future__ import annotations
 import json
 import shutil
@@ -28,10 +29,16 @@ def _prepare_manifest(cfg, exp: Path, adapter, force):
                 raise IncompatibleConfigError(
                     f"stored results in {exp} were made with compat_hash={old['compat_hash']} "
                     f"but the config now hashes to {h} (adapter/rewards/algo/eval changed). "
-                    "Use a new experiment name or pass force=True to quarantine the old runs.")
+                    "Use a new experiment name or pass force=True to quarantine the old runs."
+                )
             shutil.move(str(exp / "runs"), str(exp / f"runs_stale_{old['compat_hash']}"))
-    man = {"name": cfg["name"], "compat_hash": h, "config": cfg, "env_info": adapter.describe(),
-           "rlsignal_version": __version__}
+    man = {
+        "name": cfg["name"],
+        "compat_hash": h,
+        "config": cfg,
+        "env_info": adapter.describe(),
+        "rlsignal_version": __version__,
+    }
     mp.write_text(json.dumps(man, indent=2, default=str), encoding="utf-8")
     return man
 
@@ -63,13 +70,14 @@ def run_one(cfg, adapter, man, reward_id, seed, exp: Path, deadline=None, log=pr
     seeds_E = [ev["eval_seed_base"] + i for i in range(ev["n_episodes"])]
     seeds_R = [int(ref_cfg.get("eval_seed_base", 50000)) + i for i in range(int(ref_cfg.get("n_episodes", 0)))]
     n_null = int(ev.get("n_null_sets", 8))
-    rng_E = int(ev.get("eval_rng_seed", 12345))      # fixed policy-sampling stream for every E evaluation
+    rng_E = int(ev.get("eval_rng_seed", 12345))  # fixed policy-sampling stream for every E evaluation
     det = bool(ev.get("deterministic", False))
     pcfg = cfg.get("behavior_probe") or {}
     probe_obs = None
     if pcfg.get("enabled", False):
-        probe_obs, pid = build_probe_states(adapter, int(pcfg.get("n_states", 64)), int(pcfg.get("seed_base", 20000)),
-                                            int(pcfg.get("stride", 3)))
+        probe_obs, pid = build_probe_states(
+            adapter, int(pcfg.get("n_states", 64)), int(pcfg.get("seed_base", 20000)), int(pcfg.get("stride", 3))
+        )
         (rdir / "probe").mkdir(exist_ok=True)
         idf = rdir / "probe" / "probe_id.txt"
         stored_pid = idf.read_text(encoding="utf-8").strip() if idf.exists() else None
@@ -84,13 +92,22 @@ def run_one(cfg, adapter, man, reward_id, seed, exp: Path, deadline=None, log=pr
         # E and the matched null use the SAME env seeds; they differ only in the action-sampling stream.
         # R (reference evaluation) uses a larger, DISJOINT scenario set and its own sampling stream.
         rng_seed = rng_E if eval_set == "E" else (rng_E + 5000 if eval_set == "R" else rng_E + 1000 + int(null_idx))
-        eps = evaluate_policy(trainer, adapter, rspec, seeds_R if eval_set == "R" else seeds_E, det, kind, n_act,
-                              rng_seed=rng_seed)
+        eps = evaluate_policy(
+            trainer, adapter, rspec, seeds_R if eval_set == "R" else seeds_E, det, kind, n_act, rng_seed=rng_seed
+        )
         tw = state["train_wall_s"]
-        rec = {"checkpoint": ckpt, "eval_set": eval_set, "null_idx": null_idx, "transitions": trainer.transitions,
-               "n_envs": trainer.n_envs, "steps_per_env": trainer.transitions // trainer.n_envs,
-               "train_wall_s": tw, "transitions_per_s": trainer.transitions / tw if tw > 0 else None,
-               "eval_wall_s": time.time() - t0, "episodes": eps}
+        rec = {
+            "checkpoint": ckpt,
+            "eval_set": eval_set,
+            "null_idx": null_idx,
+            "transitions": trainer.transitions,
+            "n_envs": trainer.n_envs,
+            "steps_per_env": trainer.transitions // trainer.n_envs,
+            "train_wall_s": tw,
+            "transitions_per_s": trainer.transitions / tw if tw > 0 else None,
+            "eval_wall_s": time.time() - t0,
+            "episodes": eps,
+        }
         with open(evals, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec) + "\n")
 
@@ -118,13 +135,15 @@ def run_one(cfg, adapter, man, reward_id, seed, exp: Path, deadline=None, log=pr
     for ckpt in sorted(set(grid) | set(snap_grid)):
         if trainer.transitions >= ckpt:
             if trainer.transitions == ckpt and ckpt in grid:
-                record(ckpt, "E")            # no-op if already stored
+                record(ckpt, "E")  # no-op if already stored
                 record_extras(ckpt)
             elif ckpt in grid and (ckpt, "E", None) not in done:
                 # The run has already moved past this budget (a grid point inserted below the trained frontier):
                 # evaluating the current model under this label would be wrong. Use `rlsignal refine` on a snapshot.
-                log(f"[skip] {reward_id}/seed{seed}: budget {ckpt} is behind the trained frontier "
-                    f"({trainer.transitions}); evaluate it from a snapshot with `refine`")
+                log(
+                    f"[skip] {reward_id}/seed{seed}: budget {ckpt} is behind the trained frontier "
+                    f"({trainer.transitions}); evaluate it from a snapshot with `refine`"
+                )
             continue
         if deadline and time.time() > deadline:
             log(f"[budget] wall-clock budget exhausted at {reward_id}/seed{seed}; stopping")
@@ -132,8 +151,10 @@ def run_one(cfg, adapter, man, reward_id, seed, exp: Path, deadline=None, log=pr
         t0 = time.time()
         trainer.train(ckpt - trainer.transitions)
         state["train_wall_s"] += time.time() - t0
-        trainer.save(str(model_path))        # save BEFORE recording: a crash in between must not leave an
-        state_path.write_text(json.dumps(state), encoding="utf-8")   # evaluation that belongs to a model that is later retrained
+        trainer.save(str(model_path))  # save BEFORE recording: a crash in between must not leave an
+        state_path.write_text(
+            json.dumps(state), encoding="utf-8"
+        )  # evaluation that belongs to a model that is later retrained
         snapshot(ckpt)
         if ckpt in grid:
             record(ckpt, "E")
@@ -145,6 +166,7 @@ def run_one(cfg, adapter, man, reward_id, seed, exp: Path, deadline=None, log=pr
 def _worker(args):
     cfg, reward_id, seed, exp, deadline = args
     import torch
+
     torch.set_num_threads(1)
     adapter = build_adapter(cfg)
     man = json.loads((Path(exp) / "manifest.json").read_text(encoding="utf-8"))
@@ -163,13 +185,14 @@ def run_experiment(cfg, out_root, force=False, log=print):
     workers = int(comp.get("workers", 1))
     if workers <= 1:
         complete = True
-        for (_, r, s, _, _) in jobs:
+        for _, r, s, _, _ in jobs:
             complete &= bool(run_one(cfg, adapter, man, r, s, exp, deadline, log))
             if deadline and time.time() > deadline:
                 return exp, False
         return exp, complete
     import multiprocessing as mp
     from concurrent.futures import ProcessPoolExecutor
+
     with ProcessPoolExecutor(workers, mp_context=mp.get_context("spawn")) as ex:
         results = list(ex.map(_worker, jobs))
     return exp, all(results)
@@ -193,8 +216,13 @@ def estimate_cost(cfg, n_transitions=1024, log=print):
     runs = len(cfg["rewards"]) * len(sch["seeds"])
     n_ckpt = len(sch["checkpoints"]) + 2
     total_s = runs * (horizon / tps + n_ckpt * eval_s)
-    return {"transitions_per_s": tps, "eval_s_per_checkpoint": eval_s, "runs": runs,
-            "projected_total_hours": total_s / 3600, "projected_train_hours": runs * horizon / tps / 3600}
+    return {
+        "transitions_per_s": tps,
+        "eval_s_per_checkpoint": eval_s,
+        "runs": runs,
+        "projected_total_hours": total_s / 3600,
+        "projected_train_hours": runs * horizon / tps / 3600,
+    }
 
 
 def refine_experiment(cfg, out_root, steps, log=print):
@@ -217,18 +245,38 @@ def refine_experiment(cfg, out_root, steps, log=print):
                 if (step, "E", None) in done:
                     continue
                 if not snap.exists():
-                    missing.append(str(snap)); continue
+                    missing.append(str(snap))
+                    continue
                 tr = build_trainer(cfg, adapter, rspec, seed)
                 tr.load(str(snap))
-                eps = evaluate_policy(tr, adapter, rspec, seeds_E, bool(ev.get("deterministic", False)), kind, n_act,
-                                      rng_seed=int(ev.get("eval_rng_seed", 12345)))
-                rec = {"checkpoint": step, "eval_set": "E", "null_idx": None, "transitions": tr.transitions,
-                       "n_envs": tr.n_envs, "refined_from_snapshot": True, "episodes": eps}
+                eps = evaluate_policy(
+                    tr,
+                    adapter,
+                    rspec,
+                    seeds_E,
+                    bool(ev.get("deterministic", False)),
+                    kind,
+                    n_act,
+                    rng_seed=int(ev.get("eval_rng_seed", 12345)),
+                )
+                rec = {
+                    "checkpoint": step,
+                    "eval_set": "E",
+                    "null_idx": None,
+                    "transitions": tr.transitions,
+                    "n_envs": tr.n_envs,
+                    "refined_from_snapshot": True,
+                    "episodes": eps,
+                }
                 with open(rdir / "evals.jsonl", "a", encoding="utf-8") as f:
                     f.write(json.dumps(rec) + "\n")
                 if pcfg.get("enabled", False):
-                    obs, _ = build_probe_states(adapter, int(pcfg.get("n_states", 64)), int(pcfg.get("seed_base", 20000)),
-                                                int(pcfg.get("stride", 3)))
+                    obs, _ = build_probe_states(
+                        adapter,
+                        int(pcfg.get("n_states", 64)),
+                        int(pcfg.get("seed_base", 20000)),
+                        int(pcfg.get("stride", 3)),
+                    )
                     fp = fingerprint(tr, obs, kind, int(ev.get("eval_rng_seed", 12345)) + 7000)
                     if fp is not None:
                         (rdir / "probe").mkdir(exist_ok=True)

@@ -1,4 +1,5 @@
 """Hold-out validation: it must confirm a budget that works, refute one that does not, and refuse tampering."""
+
 import json
 import pytest
 from rlsignal.params import EstimatorParams
@@ -8,10 +9,18 @@ from rlsignal.validation.synthetic import make_estimator_runs
 
 REF_STEPS = [8192, 16384, 32768, 65536, 300032]
 HOLD_STEPS = [8192, 16384, 32768]
-P = EstimatorParams.from_cfg({"rule": "single", "criteria": [{"name": "success", "source": "metric", "key": "success",
-                                                              "direction": "higher"}]})
-TARGETS = {"tau_threshold": 0.6, "prob_tau": 0.8, "prob_top": 0.8, "pairs_prob": 0.8, "pair_fraction": 0.9,
-           "regret_max": 0.05, "prob_regret": 0.8}
+P = EstimatorParams.from_cfg(
+    {"rule": "single", "criteria": [{"name": "success", "source": "metric", "key": "success", "direction": "higher"}]}
+)
+TARGETS = {
+    "tau_threshold": 0.6,
+    "prob_tau": 0.8,
+    "prob_top": 0.8,
+    "pairs_prob": 0.8,
+    "pair_fraction": 0.9,
+    "regret_max": 0.05,
+    "prob_regret": 0.8,
+}
 
 
 def specs(qs, onset=2000, ramp=8000):
@@ -33,7 +42,7 @@ def test_confirms_a_budget_that_works_and_refutes_one_that_cannot():
     good = holdout_metrics(hold, truth, 32768, P, TARGETS, 4, n_outer=40, n_inner=40)
     early = holdout_metrics(hold, truth, 8192, P, TARGETS, 4, n_outer=40, n_inner=40)
     assert good["verdict"] in ("confirmed", "consistent_not_confirmed") and good["mean_regret"]["estimate"] < 0.05
-    assert early["verdict"] == "refuted"                                 # the negative control has power
+    assert early["verdict"] == "refuted"  # the negative control has power
 
 
 def test_refutes_when_the_short_runs_rank_rewards_differently_from_the_reference():
@@ -44,10 +53,20 @@ def test_refutes_when_the_short_runs_rank_rewards_differently_from_the_reference
 
 
 def test_setup_check_rejects_overlap_and_changed_training():
-    base = {"adapter": {"name": "x"}, "algo": {"name": "a"}, "rewards": {"r": {"weights": {"success": 1}}},
-            "schedule": {"seeds": [0, 1]}, "eval": {"eval_seed_base": 10000, "n_episodes": 30}}
-    hold = {"adapter": {"name": "x"}, "algo": {"name": "a"}, "rewards": {"r": {"weights": {"success": 1}}},
-            "schedule": {"seeds": [100, 101]}, "eval": {"eval_seed_base": 70000, "n_episodes": 30}}
+    base = {
+        "adapter": {"name": "x"},
+        "algo": {"name": "a"},
+        "rewards": {"r": {"weights": {"success": 1}}},
+        "schedule": {"seeds": [0, 1]},
+        "eval": {"eval_seed_base": 10000, "n_episodes": 30},
+    }
+    hold = {
+        "adapter": {"name": "x"},
+        "algo": {"name": "a"},
+        "rewards": {"r": {"weights": {"success": 1}}},
+        "schedule": {"seeds": [100, 101]},
+        "eval": {"eval_seed_base": 70000, "n_episodes": 30},
+    }
     assert check_same_setup(base, hold) == []
     bad = json.loads(json.dumps(hold))
     bad["schedule"]["seeds"] = [1, 2]
@@ -82,14 +101,23 @@ def toy(monkeypatch):
 def _cfgs(tmp_path):
     ref = cfg0()
     ref["name"] = "toy_ref"
-    ref["rewards"] = {"good": {"weights": {"success": 1.0}}, "ok": {"weights": {"success": 0.5}},
-                      "bad": {"weights": {"success": -1.0}}, "null_control": {"weights": {}}}
+    ref["rewards"] = {
+        "good": {"weights": {"success": 1.0}},
+        "ok": {"weights": {"success": 0.5}},
+        "bad": {"weights": {"success": -1.0}},
+        "null_control": {"weights": {}},
+    }
     ref["schedule"] = {"seeds": [0, 1, 2, 3], "checkpoints": [64, 128, 256]}
     ref["reference"] = {"budget": 256, "n_episodes": 10, "eval_seed_base": 900}
     ref["detection"] = {"n_perm": 49, "n_boot": 10, "discrim_n_perm": 50, "control_rewards": ["null_control"]}
-    ref["estimator"] = {"criteria": [{"name": "success", "source": "component", "key": "success", "direction": "higher"}],
-                        "rule": "single", "n_boot": 20, "uncertain_reference": "exclude_pairs",
-                        "ref_max_between_seed_sd": 100, "ref_max_trend": 100}
+    ref["estimator"] = {
+        "criteria": [{"name": "success", "source": "component", "key": "success", "direction": "higher"}],
+        "rule": "single",
+        "n_boot": 20,
+        "uncertain_reference": "exclude_pairs",
+        "ref_max_between_seed_sd": 100,
+        "ref_max_trend": 100,
+    }
     ref_path = tmp_path / "ref.yaml"
     ref_path.write_text(yaml.safe_dump(ref), encoding="utf-8")
     hold = copy.deepcopy(ref)
@@ -99,8 +127,14 @@ def _cfgs(tmp_path):
     hold["eval"] = {**ref["eval"], "eval_seed_base": 5000}
     for k in ("reference", "estimator", "detection"):
         hold.pop(k)
-    hold["holdout"] = {"reference_config": str(ref_path), "reference_results": str(tmp_path), "budgets": [64, 128],
-                       "experiment_seeds": 2, "n_outer": 8, "n_inner": 8}
+    hold["holdout"] = {
+        "reference_config": str(ref_path),
+        "reference_results": str(tmp_path),
+        "budgets": [64, 128],
+        "experiment_seeds": 2,
+        "n_outer": 8,
+        "n_inner": 8,
+    }
     return ref, hold
 
 
@@ -109,14 +143,15 @@ def test_workflow_preregister_run_validate_and_tamper_detection(toy, tmp_path):
     run_experiment(ref, tmp_path, log=lambda *_: None)
     path = preregister_holdout(hold, tmp_path)
     assert path.exists()
-    with pytest.raises(FileExistsError):                                    # a registration is not silently replaced
+    with pytest.raises(FileExistsError):  # a registration is not silently replaced
         preregister_holdout(hold, tmp_path)
     run_experiment(hold, tmp_path, log=lambda *_: None)
     doc = validate_holdout(hold, tmp_path)
     assert set(doc["claim_supported"]) == {"64", "128"}
     assert (tmp_path / "toy_hold" / "holdout_report.md").exists()
     # tampering is detected: changed config after registration, and edited registration
-    changed = copy.deepcopy(hold); changed["holdout"]["budgets"] = [128]
+    changed = copy.deepcopy(hold)
+    changed["holdout"]["budgets"] = [128]
     with pytest.raises(ValueError, match="differs from the pre-registered"):
         validate_holdout(changed, tmp_path)
     reg = json.loads(path.read_text(encoding="utf-8"))
@@ -136,7 +171,7 @@ def test_overlapping_seeds_cannot_be_registered(toy, tmp_path):
 
 def test_no_trustworthy_reference_means_no_registration(toy, tmp_path):
     ref, hold = _cfgs(tmp_path)
-    ref["estimator"]["ref_max_between_seed_sd"] = 1e-9                       # every reference is flagged
+    ref["estimator"]["ref_max_between_seed_sd"] = 1e-9  # every reference is flagged
     (tmp_path / "ref.yaml").write_text(yaml.safe_dump(ref), encoding="utf-8")
     run_experiment(ref, tmp_path, log=lambda *_: None)
     with pytest.raises(ValueError, match="fewer than 2 candidates|nothing trustworthy"):

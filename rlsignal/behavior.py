@@ -16,6 +16,7 @@ Each policy (reward, seed, budget) is compared with the reference of the SAME re
 ('lineage distance'). The noise floor is the mean distance between the references of different seeds of the same
 reward: a budget whose lineage distance is below that floor changes the behaviour less than seed-to-seed variation.
 """
+
 from __future__ import annotations
 import itertools
 import numpy as np
@@ -32,7 +33,7 @@ def _js_rows(P, Q):
 def _probe_dist(a, b, discrete):
     if discrete:
         return _js_rows(a, b)
-    sd = max(float(np.std(b)), 1e-8)                       # continuous control: normalised action distance
+    sd = max(float(np.std(b)), 1e-8)  # continuous control: normalised action distance
     return float(np.mean(np.linalg.norm(a - b, axis=-1)) / (sd * np.sqrt(a.shape[-1])))
 
 
@@ -57,7 +58,7 @@ def _marginal_dist(eps_a, eps_b, kind, corrected=True):
     if kind == "discrete":
         ca, cb = _pooled_counts(eps_a), _pooled_counts(eps_b)
         raw = js_divergence(ca, cb)
-        return max(raw - _sampling_floor(ca, cb), 0.0) if corrected else raw    # excess over the sampling floor
+        return max(raw - _sampling_floor(ca, cb), 0.0) if corrected else raw  # excess over the sampling floor
     A = np.mean([e["action_summary"]["mean"] for e in eps_a], 0)
     B = np.mean([e["action_summary"]["mean"] for e in eps_b], 0)
     sd = max(float(np.mean([e["action_summary"]["std"] for e in eps_b])), 1e-8)
@@ -94,8 +95,12 @@ class BehaviorDistances:
         if metric == "feature_energy":
             return energy_distance(self._feat(ra, sa, ta), self._feat(rb, sb, tb))
         if metric == "task_gap":
-            return float(max(abs(np.mean(episode_values(A.eval_E[ta], c)) -
-                                 np.mean(episode_values(B.eval_E[tb], c))) for c in self.criteria))
+            return float(
+                max(
+                    abs(np.mean(episode_values(A.eval_E[ta], c)) - np.mean(episode_values(B.eval_E[tb], c)))
+                    for c in self.criteria
+                )
+            )
         raise ValueError(metric)
 
 
@@ -107,12 +112,13 @@ def _boot_mean_ci(x, B, level, rng):
     return float(x.mean()), [float(np.quantile(m, a)), float(np.quantile(m, 1 - a))]
 
 
-def behavioral_convergence(runs, rewards, steps, ref_step, fs, criteria, action_kind, P,
-                           n_boot=500, persist_k=2, persist_ratio=2.0):
+def behavioral_convergence(
+    runs, rewards, steps, ref_step, fs, criteria, action_kind, P, n_boot=500, persist_k=2, persist_ratio=2.0
+):
     """Per reward: distance-to-own-reference curves with seed-level bootstrap CIs, threshold, onset and status."""
     D = BehaviorDistances(runs, fs, criteria, action_kind)
     rng = np.random.default_rng(P.seed + 31)
-    eval_steps = [t for t in steps if t < ref_step]       # at the reference itself the lineage distance is 0 by construction
+    eval_steps = [t for t in steps if t < ref_step]  # at the reference itself the lineage distance is 0 by construction
     out = {}
     for rid in rewards:
         seeds = sorted(runs[rid])
@@ -123,11 +129,20 @@ def behavioral_convergence(runs, rewards, steps, ref_step, fs, criteria, action_
         for met in metrics:
             floor = None
             if len(seeds) >= 2:
-                floor = float(np.mean([D.dist(met, (rid, a, ref_step), (rid, b, ref_step))
-                                       for a, b in itertools.combinations(seeds, 2)]))
+                floor = float(
+                    np.mean(
+                        [
+                            D.dist(met, (rid, a, ref_step), (rid, b, ref_step))
+                            for a, b in itertools.combinations(seeds, 2)
+                        ]
+                    )
+                )
             thr = P.behavior_thresholds.get(met)
             if P.behavior_threshold_mode == "floor_relative" and floor is not None and floor > 0:
-                thr, basis = P.behavior_floor_factor * floor, "floor_relative: factor x mean distance between references of different seeds"
+                thr, basis = (
+                    P.behavior_floor_factor * floor,
+                    "floor_relative: factor x mean distance between references of different seeds",
+                )
             elif thr is not None:
                 basis = "absolute (configured)"
             else:
@@ -138,20 +153,30 @@ def behavioral_convergence(runs, rewards, steps, ref_step, fs, criteria, action_
             if thr is None:
                 flags = np.zeros(len(eval_steps), bool)
             elif ci_ok:
-                flags = np.array([c[1] <= thr for c in cis])          # upper CI bound must be under the threshold
+                flags = np.array([c[1] <= thr for c in cis])  # upper CI bound must be under the threshold
             else:
-                flags = np.zeros(len(eval_steps), bool)               # point estimates alone never certify convergence
+                flags = np.zeros(len(eval_steps), bool)  # point estimates alone never certify convergence
             stable = first_persistent(flags, persist_k, eval_steps, persist_ratio) if flags.any() else None
-            entry["metrics"][met] = {"mean": list(means), "ci": list(cis), "threshold": thr, "threshold_basis": basis,
-                                     "reference_noise_floor": floor, "flags": flags.tolist(),
-                                     "first_below": next((eval_steps[i] for i, f in enumerate(flags) if f), None),
-                                     "stable_step": None if stable is None else int(eval_steps[stable]),
-                                     "ci_note": None if ci_ok else f"CI withheld / convergence not certified: {len(seeds)} seeds < {P.behavior_min_seeds_ci}"}
+            entry["metrics"][met] = {
+                "mean": list(means),
+                "ci": list(cis),
+                "threshold": thr,
+                "threshold_basis": basis,
+                "reference_noise_floor": floor,
+                "flags": flags.tolist(),
+                "first_below": next((eval_steps[i] for i, f in enumerate(flags) if f), None),
+                "stable_step": None if stable is None else int(eval_steps[stable]),
+                "ci_note": None
+                if ci_ok
+                else f"CI withheld / convergence not certified: {len(seeds)} seeds < {P.behavior_min_seeds_ci}",
+            }
             stable_all.append(entry["metrics"][met]["stable_step"])
             # stabilisation (separate question): change between CONSECUTIVE checkpoints
             if len(eval_steps) >= 2:
-                cons = [float(np.mean([D.dist(met, (rid, s, b), (rid, s, a)) for s in seeds]))
-                        for a, b in zip(eval_steps[:-1], eval_steps[1:])]
+                cons = [
+                    float(np.mean([D.dist(met, (rid, s, b), (rid, s, a)) for s in seeds]))
+                    for a, b in zip(eval_steps[:-1], eval_steps[1:])
+                ]
                 entry["stabilization"][met] = {"from": eval_steps[:-1], "to": eval_steps[1:], "mean_change": cons}
         if not metrics:
             entry["status"], entry["stable_step"] = "no_distance_data", None

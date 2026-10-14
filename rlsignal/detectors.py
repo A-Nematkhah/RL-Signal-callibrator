@@ -5,6 +5,7 @@ Three different questions are kept apart on purpose:
   * signal vs CONTROL runs          -> behaviour that a zero / random reward does NOT also produce
   * learning of the own objective   -> own-reward return relative to a null-calibrated floor
 """
+
 from __future__ import annotations
 import itertools
 import zlib
@@ -16,19 +17,19 @@ from .stats import bh_adjust, best_split, paired_permutation_energy_test, permut
 
 @dataclass
 class DetectionParams:
-    alpha: float = 0.05            # per-test level for behavioural change (BH across checkpoints)
-    q: float = 2 / 3               # fraction of seeds that must agree
-    persist_k: int = 2             # fallback persistence: k further tested checkpoints
-    persist_ratio: float | None = 2.0   # persistence in STEPS: signal must hold up to ratio x its onset step
+    alpha: float = 0.05  # per-test level for behavioural change (BH across checkpoints)
+    q: float = 2 / 3  # fraction of seeds that must agree
+    persist_k: int = 2  # fallback persistence: k further tested checkpoints
+    persist_ratio: float | None = 2.0  # persistence in STEPS: signal must hold up to ratio x its onset step
     n_perm: int = 499
-    null_quantile: float = 0.95    # effect floor = this quantile of the matched null bank
-    delta_l: float = 0.25          # minimum standardised return change (units of pi_0 return sd)
+    null_quantile: float = 0.95  # effect floor = this quantile of the matched null bank
+    delta_l: float = 0.25  # minimum standardised return change (units of pi_0 return sd)
     n_boot: int = 300
     discrim_alpha: float = 0.05
     discrim_n_perm: int = 2000
-    min_sep_ratio: float = 1.25    # between-group / within-group distance
-    discrim_correction: str = "none"   # none | bh
-    min_seeds_ci: int = 6          # below this, bootstrap CIs over seeds are not reported (too few resamples)
+    min_sep_ratio: float = 1.25  # between-group / within-group distance
+    discrim_correction: str = "none"  # none | bh
+    min_seeds_ci: int = 6  # below this, bootstrap CIs over seeds are not reported (too few resamples)
     control_rewards: tuple = ("null_control", "random_control")
     seed: int = 0
 
@@ -52,15 +53,15 @@ def first_persistent(agree, k, steps=None, ratio=None):
     agree = np.asarray(agree, bool)
     T = len(agree)
     if steps is None or ratio is None:
-        return next((i for i in range(T - k) if agree[i:i + k + 1].all()), None)
+        return next((i for i in range(T - k) if agree[i : i + k + 1].all()), None)
     steps = np.asarray(steps, float)
     for i in range(T):
         if not agree[i]:
             continue
         m = max(int(np.searchsorted(steps, steps[i] * ratio, side="right")) - 1, i + 1)
         if m >= T or steps[-1] < steps[i] * ratio:
-            return None                      # later onsets need an even longer horizon
-        if agree[i:m + 1].all():
+            return None  # later onsets need an even longer horizon
+        if agree[i : m + 1].all():
             return i
     return None
 
@@ -76,11 +77,16 @@ def _onsets(flags, q, k, steps=None, ratio=None):
 
 def _summarise_boot(idx_list, steps, point, n_seeds, min_ci):
     det = [i for i in idx_list if i is not None]
-    out = {"step": None if point is None else int(steps[point]),
-           "boot_detect_frac": len(det) / max(len(idx_list), 1), "ci": None}
+    out = {
+        "step": None if point is None else int(steps[point]),
+        "boot_detect_frac": len(det) / max(len(idx_list), 1),
+        "ci": None,
+    }
     if det and n_seeds >= min_ci:
-        out["ci"] = [int(steps[int(np.quantile(det, .025, method='lower'))]),
-                     int(steps[int(np.quantile(det, .975, method='higher'))])]
+        out["ci"] = [
+            int(steps[int(np.quantile(det, 0.025, method="lower"))]),
+            int(steps[int(np.quantile(det, 0.975, method="higher"))]),
+        ]
     out["ci_note"] = None if n_seeds >= min_ci else f"CI withheld: {n_seeds} seeds < {min_ci}"
     return out
 
@@ -102,7 +108,8 @@ def null_bank(runs, fs, params):
             X0 = fs.transform(r.eval_E[0])
             for k, ep in enumerate(r.null_sets):
                 st, p = paired_permutation_energy_test(fs.transform(ep), X0, params.n_perm, _rng("null", s, k))
-                stats.append(st); ps.append(p)
+                stats.append(st)
+                ps.append(p)
     return {"stat": np.array(stats), "p": np.array(ps), "n_seeds": len(seen)}
 
 
@@ -116,8 +123,9 @@ def behavioural_stats(runs_by_seed, fs, params, reward_id, steps):
         X0 = fs.transform(r.eval_E[0])
         p = np.ones(len(steps))
         for ti, t in enumerate(steps):
-            stat[si, ti], p[ti] = paired_permutation_energy_test(fs.transform(r.eval_E[t]), X0, params.n_perm,
-                                                                 _rng(reward_id, s, t))
+            stat[si, ti], p[ti] = paired_permutation_energy_test(
+                fs.transform(r.eval_E[t]), X0, params.n_perm, _rng(reward_id, s, t)
+            )
         padj[si] = bh_adjust(p)
     return {"seeds": seeds, "steps": steps, "stat": stat, "padj": padj}
 
@@ -129,8 +137,8 @@ def behavioural_onsets(bs, delta_b, params):
     on = lambda d: _onsets(d, params.q, params.persist_k, steps, params.persist_ratio)
     first, stable = on(flags)
     f = flags.astype(float)
-    b_first = _bootstrap(lambda d: on(d > .5)[0], f, n, params.n_boot, rng)
-    b_stable = _bootstrap(lambda d: on(d > .5)[1], f, n, params.n_boot, rng)
+    b_first = _bootstrap(lambda d: on(d > 0.5)[0], f, n, params.n_boot, rng)
+    b_stable = _bootstrap(lambda d: on(d > 0.5)[1], f, n, params.n_boot, rng)
     res_first = _summarise_boot(b_first, steps, first, n, params.min_seeds_ci)
     res_stable = _summarise_boot(b_stable, steps, stable, n, params.min_seeds_ci)
     res_first["transient"] = bool(first is not None and stable is None)
@@ -167,9 +175,13 @@ def learning_onsets(Z, steps, thr, params):
     n = len(Z)
     on = lambda d: _onsets(_learning_flags(d, thr), params.q, params.persist_k, steps, params.persist_ratio)
     first, stable = on(Z)
-    res_first = _summarise_boot(_bootstrap(lambda d: on(d)[0], Z, n, params.n_boot, rng), steps, first, n, params.min_seeds_ci)
-    res_stable = _summarise_boot(_bootstrap(lambda d: on(d)[1], Z, n, params.n_boot, rng), steps, stable, n, params.min_seeds_ci)
-    curve = np.concatenate([[0.0], np.median(Z, 0)])        # t=0 has z=0 by construction
+    res_first = _summarise_boot(
+        _bootstrap(lambda d: on(d)[0], Z, n, params.n_boot, rng), steps, first, n, params.min_seeds_ci
+    )
+    res_stable = _summarise_boot(
+        _bootstrap(lambda d: on(d)[1], Z, n, params.n_boot, rng), steps, stable, n, params.min_seeds_ci
+    )
+    curve = np.concatenate([[0.0], np.median(Z, 0)])  # t=0 has z=0 by construction
     k, diff = best_split(curve)
     full = [0] + list(steps)
     cp = {"step": None, "effect": float(diff)}
@@ -205,9 +217,13 @@ def control_signal(run_means, rid, controls, steps, params):
         per[c] = f.tolist()
         flags &= f
     first, stable = first_flag(flags), first_persistent(flags, params.persist_k, steps, params.persist_ratio)
-    return {"controls": list(controls), "first": None if first is None else int(steps[first]),
-            "stable": None if stable is None else int(steps[stable]), "flags_per_control": per,
-            "flags_all_controls": flags.tolist()}
+    return {
+        "controls": list(controls),
+        "first": None if first is None else int(steps[first]),
+        "stable": None if stable is None else int(steps[stable]),
+        "flags_per_control": per,
+        "flags_all_controls": flags.tolist(),
+    }
 
 
 # ------------------------------------------------------------------ reward discrimination (diagnostic only)
@@ -226,5 +242,8 @@ def discrimination(run_means, rewards, steps, params):
     for pi, (a, b) in enumerate(pairs):
         i = first_persistent(flags[pi], params.persist_k, steps, params.persist_ratio)
         pair_onsets[f"{a}|{b}"] = None if i is None else int(steps[i])
-    return {"pair_flagged_fraction": flags.mean(0).tolist(), "pair_onsets": pair_onsets,
-            "never_distinguished": [k for k, v in pair_onsets.items() if v is None]}
+    return {
+        "pair_flagged_fraction": flags.mean(0).tolist(),
+        "pair_onsets": pair_onsets,
+        "never_distinguished": [k for k, v in pair_onsets.items() if v is None],
+    }

@@ -1,12 +1,17 @@
 """Every text-mode file operation must pass an explicit encoding (the Windows default cp1252 broke YAML loading)."""
+
 import ast
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-FILES = sorted(p for d in ("rlsignal", "tests", "experiments") for p in (ROOT / d).rglob("*.py")
-               if "pilot_v2_reanalysis" not in p.parts)
+FILES = sorted(
+    p
+    for d in ("rlsignal", "tests", "experiments")
+    for p in (ROOT / d).rglob("*.py")
+    if "pilot_v2_reanalysis" not in p.parts
+)
 
 
 def _missing_encoding(tree):
@@ -20,7 +25,9 @@ def _missing_encoding(tree):
         if any(k.arg == "encoding" for k in node.keywords):
             continue
         if name == "open":
-            mode = node.args[1] if len(node.args) > 1 else next((k.value for k in node.keywords if k.arg == "mode"), None)
+            mode = (
+                node.args[1] if len(node.args) > 1 else next((k.value for k in node.keywords if k.arg == "mode"), None)
+            )
             if isinstance(mode, ast.Constant) and "b" in str(mode.value):
                 continue
         yield node.lineno

@@ -1,4 +1,5 @@
 """Runner / resume / hash / loader / analysis plumbing, with a toy env and a dummy trainer (no torch needed)."""
+
 import json
 from contextlib import contextmanager
 import numpy as np
@@ -58,7 +59,8 @@ class DummyTrainer(Trainer):
         self.logit += self.w * k / 200.0 + self.rng.normal() * 0.01
 
     def act(self, obs, deterministic):
-        p = np.array([np.exp(self.logit), 1.0, 1.0]); p /= p.sum()
+        p = np.array([np.exp(self.logit), 1.0, 1.0])
+        p /= p.sum()
         return int(self.sample_rng.choice(3, p=p))
 
     @contextmanager
@@ -86,13 +88,16 @@ def patch(monkeypatch):
 
 
 def cfg0():
-    return {"name": "toy", "adapter": {"name": "toy", "crowdnav_path": "/some/machine/path"},
-            "rewards": {"good": {"weights": {"success": 1.0}}, "null_control": {"weights": {}}},
-            "algo": {"name": "dummy", "n_envs": 1, "hyperparams": {}},
-            "eval": {"n_episodes": 5, "eval_seed_base": 100, "n_null_sets": 3, "deterministic": False},
-            "schedule": {"seeds": [0, 1], "checkpoints": [64, 128, 256]},
-            "compute": {"workers": 1},
-            "detection": {"n_perm": 49, "n_boot": 10, "discrim_n_perm": 100}}
+    return {
+        "name": "toy",
+        "adapter": {"name": "toy", "crowdnav_path": "/some/machine/path"},
+        "rewards": {"good": {"weights": {"success": 1.0}}, "null_control": {"weights": {}}},
+        "algo": {"name": "dummy", "n_envs": 1, "hyperparams": {}},
+        "eval": {"n_episodes": 5, "eval_seed_base": 100, "n_null_sets": 3, "deterministic": False},
+        "schedule": {"seeds": [0, 1], "checkpoints": [64, 128, 256]},
+        "compute": {"workers": 1},
+        "detection": {"n_perm": 49, "n_boot": 10, "discrim_n_perm": 100},
+    }
 
 
 def test_run_resume_guard_and_matched_null_layout(tmp_path):
@@ -101,15 +106,31 @@ def test_run_resume_guard_and_matched_null_layout(tmp_path):
     assert done
     f = exp / "runs" / "good" / "seed0" / "evals.jsonl"
     recs = [json.loads(l) for l in f.read_text(encoding="utf-8").splitlines()]
-    assert [(r["checkpoint"], r["eval_set"], r["null_idx"]) for r in recs] == \
-        [(0, "E", None), (0, "null", 0), (0, "null", 1), (0, "null", 2), (64, "E", None), (128, "E", None), (256, "E", None)]
+    assert [(r["checkpoint"], r["eval_set"], r["null_idx"]) for r in recs] == [
+        (0, "E", None),
+        (0, "null", 0),
+        (0, "null", 1),
+        (0, "null", 2),
+        (64, "E", None),
+        (128, "E", None),
+        (256, "E", None),
+    ]
     # matched null: same env seeds as E, so that E[0] and null sets differ only by action sampling
     assert [e["seed"] for e in recs[0]["episodes"]] == [e["seed"] for e in recs[1]["episodes"]]
-    assert recs[1]["episodes"] != recs[2]["episodes"]                       # different sampling streams
-    cfg["schedule"]["checkpoints"] = [64, 128, 256, 384]                    # extending the grid resumes
+    assert recs[1]["episodes"] != recs[2]["episodes"]  # different sampling streams
+    cfg["schedule"]["checkpoints"] = [64, 128, 256, 384]  # extending the grid resumes
     run_experiment(cfg, tmp_path, log=lambda *_: None)
-    assert [r["checkpoint"] for r in map(json.loads, f.read_text(encoding="utf-8").splitlines())] == [0, 0, 0, 0, 64, 128, 256, 384]
-    cfg["algo"]["hyperparams"]["gamma"] = 0.5                               # incompatible config is refused
+    assert [r["checkpoint"] for r in map(json.loads, f.read_text(encoding="utf-8").splitlines())] == [
+        0,
+        0,
+        0,
+        0,
+        64,
+        128,
+        256,
+        384,
+    ]
+    cfg["algo"]["hyperparams"]["gamma"] = 0.5  # incompatible config is refused
     with pytest.raises(IncompatibleConfigError):
         run_experiment(cfg, tmp_path, log=lambda *_: None)
 
@@ -129,8 +150,10 @@ def test_pi0_is_identical_across_rewards_and_analysis_runs(tmp_path):
     exp, _ = run_experiment(cfg, tmp_path, log=lambda *_: None)
     man, runs = load_experiment(exp)
     beh = lambda r: [(e["action_summary"], e["reward_components"], e["length"]) for e in r.eval_E[0]]
-    assert beh(runs["good"][0]) == beh(runs["null_control"][0])            # why the null bank is deduplicated per seed
+    assert beh(runs["good"][0]) == beh(runs["null_control"][0])  # why the null bank is deduplicated per seed
     res = analyze_experiment(exp)
     assert res["calibration"]["n_null_independent_seeds"] == 4
     assert (exp / "report.md").exists()
-    assert "crowdnav_path" not in (exp / "report.md").read_text(encoding="utf-8")           # no machine path leaks into the report
+    assert "crowdnav_path" not in (exp / "report.md").read_text(
+        encoding="utf-8"
+    )  # no machine path leaks into the report

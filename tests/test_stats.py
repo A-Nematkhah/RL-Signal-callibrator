@@ -32,13 +32,17 @@ def test_best_split():
 
 def test_paired_permutation_null_is_calibrated_and_detects_shift():
     from rlsignal.stats import paired_permutation_energy_test
+
     rng = np.random.default_rng(3)
     ps = []
     for _ in range(120):
-        scen = rng.normal(size=(30, 3)) * 3                  # strong shared scenario effect
-        ps.append(paired_permutation_energy_test(scen + rng.normal(size=(30, 3)) * .3,
-                                                 scen + rng.normal(size=(30, 3)) * .3, 199, rng)[1])
+        scen = rng.normal(size=(30, 3)) * 3  # strong shared scenario effect
+        ps.append(
+            paired_permutation_energy_test(
+                scen + rng.normal(size=(30, 3)) * 0.3, scen + rng.normal(size=(30, 3)) * 0.3, 199, rng
+            )[1]
+        )
     assert np.mean(np.array(ps) < 0.05) < 0.12
     scen = rng.normal(size=(30, 3)) * 3
-    _, p = paired_permutation_energy_test(scen + 0.8 + rng.normal(size=(30, 3)) * .3, scen, 199, rng)
-    assert p < 0.01      # paired design sees a shift that the shared scenario variance would hide from the unpaired test
+    _, p = paired_permutation_energy_test(scen + 0.8 + rng.normal(size=(30, 3)) * 0.3, scen, 199, rng)
+    assert p < 0.01  # paired design sees a shift that the shared scenario variance would hide from the unpaired test

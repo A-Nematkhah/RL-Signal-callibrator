@@ -1,4 +1,5 @@
 """The synthetic estimator fixtures must stay bit-identical for a given seed: other tests are calibrated on them."""
+
 import hashlib
 import json
 
@@ -6,10 +7,12 @@ import numpy as np
 
 from rlsignal.validation.synthetic import make_estimator_runs
 
-SPECS = {"a": dict(p_final=0.8, onset=2000, ramp=4000, seed_sd=0.05, coll_final=0.2, ret_final=1.0),
-         "b": dict(p_final=0.4, onset=1000, ramp=8000, beh_onset=0, beh_ramp=3000, fail_frac=0.3),
-         "c": dict(p_final=0.3, drift=0.4),
-         "null_control": dict(p_final=0.0)}
+SPECS = {
+    "a": dict(p_final=0.8, onset=2000, ramp=4000, seed_sd=0.05, coll_final=0.2, ret_final=1.0),
+    "b": dict(p_final=0.4, onset=1000, ramp=8000, beh_onset=0, beh_ramp=3000, fail_frac=0.3),
+    "c": dict(p_final=0.3, drift=0.4),
+    "null_control": dict(p_final=0.0),
+}
 STEPS = [2048, 4096, 8192, 16384]
 
 

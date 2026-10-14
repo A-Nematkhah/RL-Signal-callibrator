@@ -4,6 +4,7 @@ This is a re-analysis of existing evaluations, not new RL training. The stored p
   * no dedicated reference evaluation (eval_set "R") exists -> the reference ranking reuses the 30 evaluation scenarios;
   * no probe fingerprints exist -> policy-level JS is unavailable; pooled-action JS, feature energy and task gap are used.
 Usage: python experiments/reanalyze_pilot.py [results_dir] [out_dir]"""
+
 import json
 import shutil
 import sys
@@ -17,13 +18,24 @@ out = Path(sys.argv[2] if len(sys.argv) > 2 else "experiments/pilot_v2_reanalysi
 cfg = load_config("configs/crowdnav_pilot.yaml")
 VARIANTS = {
     "pareto_success_collision": cfg["estimator"],
-    "success_only": {**cfg["estimator"], "rule": "single",
-                     "criteria": [{"name": "success", "source": "metric", "key": "success", "direction": "higher"}]},
-    "success_only_exclude_uncertain": {**cfg["estimator"], "rule": "single", "uncertain_reference": "exclude_pairs",
-                                       "criteria": [{"name": "success", "source": "metric", "key": "success", "direction": "higher"}]},
-    "success_only_bonferroni": {**cfg["estimator"], "rule": "single", "uncertain_reference": "exclude_pairs",
-                                "looks_correction": "bonferroni",
-                                "criteria": [{"name": "success", "source": "metric", "key": "success", "direction": "higher"}]},
+    "success_only": {
+        **cfg["estimator"],
+        "rule": "single",
+        "criteria": [{"name": "success", "source": "metric", "key": "success", "direction": "higher"}],
+    },
+    "success_only_exclude_uncertain": {
+        **cfg["estimator"],
+        "rule": "single",
+        "uncertain_reference": "exclude_pairs",
+        "criteria": [{"name": "success", "source": "metric", "key": "success", "direction": "higher"}],
+    },
+    "success_only_bonferroni": {
+        **cfg["estimator"],
+        "rule": "single",
+        "uncertain_reference": "exclude_pairs",
+        "looks_correction": "bonferroni",
+        "criteria": [{"name": "success", "source": "metric", "key": "success", "direction": "higher"}],
+    },
 }
 for name, est in VARIANTS.items():
     work = Path(tempfile.gettempdir()) / f"reanalysis_{name}"
@@ -40,5 +52,7 @@ for name, est in VARIANTS.items():
     shutil.copy(work / "report.md", dest / "report.md")
     (dest / "estimator.json").write_text(json.dumps(res["estimator"], indent=2, default=str), encoding="utf-8")
     d = res["estimator"]["decision"]
-    print(f"{name}: {d['status']} min={d['minimum_reliable_budget']} rec={d['recommended_budget']} "
-          f"provisional={d.get('provisional_budget_if_reference_were_trusted')}")
+    print(
+        f"{name}: {d['status']} min={d['minimum_reliable_budget']} rec={d['recommended_budget']} "
+        f"provisional={d.get('provisional_budget_if_reference_were_trusted')}"
+    )

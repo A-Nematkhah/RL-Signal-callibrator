@@ -16,6 +16,7 @@ Holonomic actions are expressed in the same goal-aligned frame as the observatio
 Scenarios are reproducible: reset(seed=s) generates the same human layout for the same s, and the global NumPy
 RNG state is restored after reset so the scenario seeding does not leak into the RL algorithm.
 """
+
 from __future__ import annotations
 import configparser
 import os
@@ -28,9 +29,19 @@ from .base import EnvAdapter
 
 DEFAULT_CFG = {
     "env": {"time_limit": 25, "time_step": 0.25, "val_size": 100, "test_size": 500, "randomize_attributes": False},
-    "reward": {"success_reward": 1, "collision_penalty": -0.25, "discomfort_dist": 0.2, "discomfort_penalty_factor": 0.5},
-    "sim": {"train_val_sim": "circle_crossing", "test_sim": "circle_crossing", "square_width": 10,
-            "circle_radius": 4, "human_num": 5},
+    "reward": {
+        "success_reward": 1,
+        "collision_penalty": -0.25,
+        "discomfort_dist": 0.2,
+        "discomfort_penalty_factor": 0.5,
+    },
+    "sim": {
+        "train_val_sim": "circle_crossing",
+        "test_sim": "circle_crossing",
+        "square_width": 10,
+        "circle_radius": 4,
+        "human_num": 5,
+    },
     "humans": {"visible": True, "policy": "orca", "radius": 0.3, "v_pref": 1, "sensor": "coordinates"},
     "robot": {"visible": False, "policy": "none", "radius": 0.3, "v_pref": 1, "sensor": "coordinates"},
 }
@@ -48,7 +59,7 @@ def _import_crowd_sim(path):
         sys.path.insert(0, path)
     try:
         import gym  # noqa: F401
-    except ImportError:               # CrowdSim only needs gym.Env and gym's register(); alias Gymnasium
+    except ImportError:  # CrowdSim only needs gym.Env and gym's register(); alias Gymnasium
         sys.modules["gym"] = gym_mod = __import__("gymnasium")
         sys.modules["gym.envs"] = gym_mod.envs
         sys.modules["gym.envs.registration"] = gym_mod.envs.registration
@@ -56,12 +67,14 @@ def _import_crowd_sim(path):
     from crowd_sim.envs.utils.action import ActionRot, ActionXY
     from crowd_sim.envs.utils.info import Collision, Danger, ReachGoal, Timeout
     from crowd_sim.envs.utils.robot import Robot
+
     return CrowdSim, Robot, ActionXY, ActionRot, (Collision, Danger, ReachGoal, Timeout)
 
 
 class _RobotPolicy:
     """CrowdSim.reset() reads these attributes from robot.policy; the RL agent supplies the actions."""
-    multiagent_training = True      # read by CrowdSim.reset() to decide how many humans to spawn
+
+    multiagent_training = True  # read by CrowdSim.reset() to decide how many humans to spawn
     kinematics = None
 
     def __init__(self, kinematics):
@@ -70,10 +83,19 @@ class _RobotPolicy:
 
 
 class CrowdNavGymEnv(gym.Env):
-    metadata = {"render_modes": []}     # gymnasium.Env contract
+    metadata = {"render_modes": []}  # gymnasium.Env contract
 
-    def __init__(self, weights, crowdnav_path=None, env_config=None, kinematics="holonomic", n_speeds=5,
-                 n_rotations=16, rotation_constraint=np.pi / 3, obs_mode="ego"):
+    def __init__(
+        self,
+        weights,
+        crowdnav_path=None,
+        env_config=None,
+        kinematics="holonomic",
+        n_speeds=5,
+        n_rotations=16,
+        rotation_constraint=np.pi / 3,
+        obs_mode="ego",
+    ):
         CrowdSim, Robot, self._XY, self._Rot, self._T = _import_crowd_sim(crowdnav_path)
         cfgd = {s: dict(v) for s, v in DEFAULT_CFG.items()}
         for sec, kv in (env_config or {}).items():
@@ -92,13 +114,15 @@ class CrowdNavGymEnv(gym.Env):
         speeds = [(np.exp((i + 1) / n_speeds) - 1) / (np.e - 1) * v for i in range(n_speeds)]
         if kinematics == "holonomic":
             rots = np.linspace(0, 2 * np.pi, n_rotations, endpoint=False)
-            self._actions = [self._XY(0.0, 0.0)] + [self._XY(s * np.cos(r), s * np.sin(r)) for s in speeds for r in rots]
+            self._actions = [self._XY(0.0, 0.0)] + [
+                self._XY(s * np.cos(r), s * np.sin(r)) for s in speeds for r in rots
+            ]
         else:
             rots = np.linspace(-rotation_constraint, rotation_constraint, n_rotations)
             self._actions = [self._Rot(0.0, 0.0)] + [self._Rot(s, r) for s in speeds for r in rots]
         self.action_space = spaces.Discrete(len(self._actions))
         n = 5 + 5 * self.sim.human_num
-        self.observation_space = spaces.Box(-np.inf, np.inf, (n,), np.float32)   # used by SB3 to build the policy
+        self.observation_space = spaces.Box(-np.inf, np.inf, (n,), np.float32)  # used by SB3 to build the policy
         self._rng = np.random.default_rng(0)
         self._noise_rng = np.random.default_rng(1)
         self._dg = 0.0
@@ -108,8 +132,10 @@ class CrowdNavGymEnv(gym.Env):
         return float(np.hypot(self.robot.px - self.robot.gx, self.robot.py - self.robot.gy))
 
     def _min_dist(self):
-        return min(float(np.hypot(h.px - self.robot.px, h.py - self.robot.py)) - h.radius - self.robot.radius
-                   for h in self.sim.humans)
+        return min(
+            float(np.hypot(h.px - self.robot.px, h.py - self.robot.py)) - h.radius - self.robot.radius
+            for h in self.sim.humans
+        )
 
     def _obs(self, ob):
         r = self.robot
@@ -141,18 +167,18 @@ class CrowdNavGymEnv(gym.Env):
         return self._XY(c * act.vx - s * act.vy, s * act.vx + c * act.vy)
 
     # ---- gymnasium API
-    def reset(self, *, seed=None, options=None):    # `options` is part of the gymnasium signature (unused here)
+    def reset(self, *, seed=None, options=None):  # `options` is part of the gymnasium signature (unused here)
         if seed is None:
-            seed = int(self._rng.integers(0, 2 ** 30))
+            seed = int(self._rng.integers(0, 2**30))
         else:
             self._rng = np.random.default_rng(seed)
-        self._noise_rng = np.random.default_rng(int(seed) + 7919)   # reproducible, independent of scenario RNG
+        self._noise_rng = np.random.default_rng(int(seed) + 7919)  # reproducible, independent of scenario RNG
         state = np.random.get_state()
         try:
             self.sim.case_counter["train"] = int(seed)
             ob = self.sim.reset(phase="train")
         finally:
-            np.random.set_state(state)      # scenario seeding must not leak into the RL algorithm
+            np.random.set_state(state)  # scenario seeding must not leak into the RL algorithm
         self._dg0 = self._dg = self._goal_dist()
         return self._obs(ob), {}
 
@@ -163,22 +189,41 @@ class CrowdNavGymEnv(gym.Env):
         dg = self._goal_dist()
         speed = float(np.hypot(act.vx, act.vy)) if self.kinematics == "holonomic" else float(act.v)
         md = self._min_dist()
-        comps = {"success": float(isinstance(cinfo, ReachGoal)), "collision": float(isinstance(cinfo, Collision)),
-                 "timeout": float(isinstance(cinfo, Timeout)), "step": 1.0,
-                 "goal_progress": self._dg - dg, "speed": speed / max(self.robot.v_pref, 1e-9),
-                 "noise": float(self._noise_rng.normal()),
-                 "discomfort": float((self.sim.discomfort_dist - cinfo.min_dist) / self.sim.discomfort_dist)
-                 if isinstance(cinfo, Danger) else 0.0}
+        comps = {
+            "success": float(isinstance(cinfo, ReachGoal)),
+            "collision": float(isinstance(cinfo, Collision)),
+            "timeout": float(isinstance(cinfo, Timeout)),
+            "step": 1.0,
+            "goal_progress": self._dg - dg,
+            "speed": speed / max(self.robot.v_pref, 1e-9),
+            "noise": float(self._noise_rng.normal()),
+            "discomfort": float((self.sim.discomfort_dist - cinfo.min_dist) / self.sim.discomfort_dist)
+            if isinstance(cinfo, Danger)
+            else 0.0,
+        }
         reward = float(sum(w * comps.get(k, 0.0) for k, w in self.weights.items()))
         hx = (self.robot.gx - self.robot.px, self.robot.gy - self.robot.py)
-        vx, vy = (act.vx, act.vy) if self.kinematics == "holonomic" else (
-            act.v * np.cos(self.robot.theta), act.v * np.sin(self.robot.theta))
+        vx, vy = (
+            (act.vx, act.vy)
+            if self.kinematics == "holonomic"
+            else (act.v * np.cos(self.robot.theta), act.v * np.sin(self.robot.theta))
+        )
         cosine = float((vx * hx[0] + vy * hx[1]) / max(np.hypot(vx, vy) * np.hypot(*hx), 1e-9)) if speed > 0 else 0.0
         self._dg = dg
-        info = {"reward_components": comps, "env_reward": float(env_r), "outcome": str(cinfo),
-                "goal_dist": dg, "goal_dist0": self._dg0, "min_dist": md, "speed": speed,
-                "step_dist": speed * self.dt, "speed_frac": comps["speed"], "heading_cos": cosine, "stopped": float(speed == 0.0),
-                "discomfort_step": float(isinstance(cinfo, Danger))}
+        info = {
+            "reward_components": comps,
+            "env_reward": float(env_r),
+            "outcome": str(cinfo),
+            "goal_dist": dg,
+            "goal_dist0": self._dg0,
+            "min_dist": md,
+            "speed": speed,
+            "step_dist": speed * self.dt,
+            "speed_frac": comps["speed"],
+            "heading_cos": cosine,
+            "stopped": float(speed == 0.0),
+            "discomfort_step": float(isinstance(cinfo, Danger)),
+        }
         terminated = bool(done and not isinstance(cinfo, Timeout))
         truncated = bool(isinstance(cinfo, Timeout))
         return self._obs(ob), reward, terminated, truncated, info
@@ -187,10 +232,17 @@ class CrowdNavGymEnv(gym.Env):
 class CrowdNavAdapter(EnvAdapter):
     name = "crowdnav"
 
-    def __init__(self, crowdnav_path=None, env_config=None, kinematics="holonomic", n_speeds=5, n_rotations=16,
-                 obs_mode="ego"):
-        self.kw = dict(crowdnav_path=crowdnav_path, env_config=env_config, kinematics=kinematics,
-                       n_speeds=n_speeds, n_rotations=n_rotations, obs_mode=obs_mode)
+    def __init__(
+        self, crowdnav_path=None, env_config=None, kinematics="holonomic", n_speeds=5, n_rotations=16, obs_mode="ego"
+    ):
+        self.kw = dict(
+            crowdnav_path=crowdnav_path,
+            env_config=env_config,
+            kinematics=kinematics,
+            n_speeds=n_speeds,
+            n_rotations=n_rotations,
+            obs_mode=obs_mode,
+        )
 
     def make_env(self, reward_spec):
         return CrowdNavGymEnv(reward_spec.get("weights", {}), **self.kw)

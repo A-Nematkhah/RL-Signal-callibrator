@@ -5,6 +5,7 @@ probe states, so two policies can be compared state by state. Probe states are r
 rollouts of the environment on scenario seeds disjoint from the evaluation seeds) and reproducible from the config.
 Limitation: states visited by a random policy are not the states a trained policy visits; the episode-level
 distances (task criteria, pooled actions, feature energy) are the on-policy counterpart."""
+
 from __future__ import annotations
 import hashlib
 import numpy as np

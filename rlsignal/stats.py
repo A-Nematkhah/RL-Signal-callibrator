@@ -1,4 +1,5 @@
 """Environment-independent statistics."""
+
 from __future__ import annotations
 import numpy as np
 from scipy.spatial.distance import cdist, jensenshannon
