@@ -122,7 +122,10 @@ never touching the training run. A grid point inserted *behind* a run's trained 
 (evaluating it would label the later model with the earlier budget).
 
 **Not claimed.** No policy is declared optimal/converged because of its budget, plateau, or similarity to a reference.
-Budgets are conditional on the design (seeds, episodes, rule). Defaults are placeholders to calibrate.
+Budgets are conditional on the design (seeds, episodes, rule). Defaults are placeholders to calibrate —
+in particular `behavior_threshold_mode: floor_relative` with `behavior_floor_factor: 1.0` often yields thresholds that are
+a large fraction of every observed distance-to-reference (especially `probe_js` / `action_marginal_js`); those metrics
+are flagged `uninformative` and excluded from the overall `converged` status until the defaults are calibrated.
 
 **Limitations.** Probe states come from random-action rollouts (not on-policy); the stored pilot
 (`results/crowdnav_pilot_v2`) predates the estimator and has no `R` set or probes; with 8 seeds the split is 4/4
