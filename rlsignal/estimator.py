@@ -160,18 +160,22 @@ def _questions(res):
     beh = res.get("behavior", {}).get("convergence", {})
     stab = {}
     for rid, e in beh.items():
-        met = next(iter(e["stabilization"]), None)
-        if met is None:
-            stab[rid] = {"stabilized": None, "note": "no stabilisation data"}
+        if not e["stabilization"]:
+            stab[rid] = {"stabilized": None, "per_metric": {}, "note": "no stabilisation data"}
             continue
-        ch = e["stabilization"][met]["mean_change"]
-        floor = e["metrics"][met]["reference_noise_floor"]
-        stab[rid] = {
-            "metric": met,
-            "last_consecutive_change": ch[-1],
-            "reference_noise_floor": floor,
-            "stabilized": None if floor is None else bool(ch[-1] <= floor),
-        }
+        per = {}
+        for met, s in e["stabilization"].items():
+            ch = s["mean_change"]
+            floor = e["metrics"][met]["reference_noise_floor"]
+            per[met] = {
+                "last_consecutive_change": ch[-1],
+                "reference_noise_floor": floor,
+                "stabilized": None if floor is None else bool(ch[-1] <= floor),
+            }
+        verdicts = [v["stabilized"] for v in per.values()]
+        # every metric must be at or below its own floor; one metric above its floor settles the answer
+        overall = False if False in verdicts else (None if None in verdicts else True)
+        stab[rid] = {"stabilized": overall, "per_metric": per, "rule": "all metrics <= their own noise floor"}
     rr = res["ranking"].get("reference_reproducibility", {})
     return {
         "1_behaviour_stabilised": stab,
