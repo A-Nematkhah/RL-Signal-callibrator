@@ -263,11 +263,17 @@ def write_report(res, man, out_dir):
                 f"- reference step: {rk['reference_step']}; reference reliability (median tau between seed halves): "
                 f"{rk['reference_reliability_tau_median']:.2f}",
                 "",
-                "| step | median tau | P(tau>=thr) | P(top-1 correct) |",
-                "|---|---|---|---|",
+                "| step | median tau | P(tau>=thr) | P(top-1 correct) | P(undefined tau treated as 0.0) |",
+                "|---|---|---|---|---|",
             ]
+            undef = rk.get("frac_tau_undefined_as_zero") or [0.0] * len(rk["steps"])
             for i, t in enumerate(rk["steps"]):
-                L.append(f"| {t} | {rk['tau_median'][i]:.2f} | {rk['frac_tau_ok'][i]:.2f} | {rk['p_top1'][i]:.2f} |")
+                L.append(
+                    f"| {t} | {rk['tau_median'][i]:.2f} | {rk['frac_tau_ok'][i]:.2f} | {rk['p_top1'][i]:.2f} | "
+                    f"{undef[i]:.2f} |"
+                )
+            if rk.get("tau_note"):
+                L.append(f"- note: {rk['tau_note']}")
         prefix = "LEGACY (not the decision) " if superseded else ""
         L.append(f"- {prefix}first agreeing budget: {rk['first']}, stable: {rk['stable']}; {rk['reason'] or ''}")
     est = res.get("estimator")

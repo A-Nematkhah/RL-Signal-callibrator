@@ -18,11 +18,19 @@ def reference_return(ep, weights):
     return float(sum(w * comps.get(k, 0.0) for k, w in weights.items()))
 
 
-def _tau(a, b):
+def _tau_undefined(a, b):
+    """True when Kendall tau-b is undefined (constant ranking / NaN statistic). Legacy `_tau` maps these to 0.0."""
     if np.ptp(a) == 0 or np.ptp(b) == 0:
-        return 0.0  # a constant ranking carries no order information
-    t = kendalltau(a, b).statistic
-    return 0.0 if np.isnan(t) else float(t)
+        return True
+    return bool(np.isnan(kendalltau(a, b).statistic))
+
+
+def _tau(a, b):
+    # LEGACY: undefined correlations become 0.0 (not NaN). Kept for reproducible ranking_analysis numbers;
+    # `frac_tau_undefined_as_zero` and the report label make the mapping visible. Prefer metrics.tau_b elsewhere.
+    if _tau_undefined(a, b):
+        return 0.0
+    return float(kendalltau(a, b).statistic)
 
 
 def ranking_analysis(runs, steps, cfg, params, candidates):
@@ -47,14 +55,17 @@ def ranking_analysis(runs, steps, cfg, params, candidates):
     rng = np.random.default_rng(params.seed + 2)
     h = len(seeds) // 2
     taus, top1, rel = np.zeros((B, T)), np.zeros((B, T)), np.zeros(B)
+    undef = np.zeros((B, T), bool)
     for b in range(B):
         perm = rng.permutation(len(seeds))
         A, Bi = perm[:h], perm[h : 2 * h]
         refA = M[:, A, ref_t].mean(1)
-        rel[b] = _tau(refA, M[:, Bi, ref_t].mean(1))
+        refB = M[:, Bi, ref_t].mean(1)
+        rel[b] = _tau(refA, refB)
         best_ref = set(np.flatnonzero(refA == refA.max()))
         for ti in range(T):
             tb = M[:, Bi, ti].mean(1)
+            undef[b, ti] = _tau_undefined(refA, tb)
             taus[b, ti] = _tau(refA, tb)
             top1[b, ti] = float(int(np.argmax(tb)) in best_ref)
     frac = (taus >= thr).mean(0)
@@ -71,6 +82,8 @@ def ranking_analysis(runs, steps, cfg, params, candidates):
             "reference_ranking_reliable": reliable,
             "tau_median": np.median(taus, 0).tolist(),
             "frac_tau_ok": frac.tolist(),
+            "frac_tau_undefined_as_zero": undef.mean(0).tolist(),
+            "tau_note": "undefined tau (constant ranking / NaN) is treated as 0.0 in this legacy path",
             "p_top1": top1.mean(0).tolist(),
             "mean_reference_return_by_candidate": {c: float(M[i, :, ref_t].mean()) for i, c in enumerate(candidates)},
         }
