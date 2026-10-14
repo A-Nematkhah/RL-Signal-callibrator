@@ -95,8 +95,21 @@ def test_2_behaviour_stable_but_ranking_uncertain():
         for i in range(5)
     }
     specs["null_control"] = dict(p_final=0.0)
-    r = run(specs, cfg={"behavior_metrics": ["probe_js"]}, seed=2, n_eps=20)
+    # absolute threshold well below the early-step distances of this fixture (floor_relative with factor 1.0 is often
+    # uninformative on real data; that is reported by the uninformative-metric guard, not silently accepted here)
+    r = run(
+        specs,
+        cfg={
+            "behavior_metrics": ["probe_js"],
+            "behavior_threshold_mode": "absolute",
+            "behavior_thresholds": {"probe_js": 0.005},
+            "behavior_uninformative_ratio": 0.8,
+        },
+        seed=2,
+        n_eps=20,
+    )
     assert all(e["status"] == "converged" for e in r["behavior"]["convergence"].values())
+    assert all(not e["metrics"]["probe_js"]["uninformative"] for e in r["behavior"]["convergence"].values())
     assert r["decision"]["status"] in ("reference_ranking_unreliable", "insufficient_evidence_at_max_budget")
     assert r["decision"]["recommended_budget"] is None  # stable behaviour does not imply a ranking
 

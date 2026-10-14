@@ -79,6 +79,9 @@ class EstimatorParams:
     behavior_thresholds: dict = field(
         default_factory=lambda: {"probe_js": 0.05, "action_marginal_js": 0.02, "task_gap": 0.10, "feature_energy": None}
     )
+    # a metric whose threshold is >= ratio x its largest distance-to-reference over the evaluated budgets cannot
+    # separate converged from unconverged policies: it is reported as `uninformative` and ignored by the status
+    behavior_uninformative_ratio: float = 0.5
     behavior_ci: float = 0.95
     behavior_min_seeds_ci: int = 6
 

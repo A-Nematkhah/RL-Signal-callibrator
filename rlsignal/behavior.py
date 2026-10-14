@@ -150,7 +150,9 @@ def behavioral_convergence(
             per = np.array([[D.dist(met, (rid, s, t), (rid, s, ref_step)) for t in eval_steps] for s in seeds])
             means, cis = zip(*[_boot_mean_ci(per[:, i], n_boot, P.behavior_ci, rng) for i in range(len(eval_steps))])
             ci_ok = len(seeds) >= P.behavior_min_seeds_ci
-            if thr is None:
+            max_dist = float(max(means)) if means else 0.0
+            uninformative = bool(thr is not None and max_dist > 0 and thr >= P.behavior_uninformative_ratio * max_dist)
+            if thr is None or uninformative:
                 flags = np.zeros(len(eval_steps), bool)
             elif ci_ok:
                 flags = np.array([c[1] <= thr for c in cis])  # upper CI bound must be under the threshold
@@ -163,6 +165,15 @@ def behavioral_convergence(
                 "threshold": thr,
                 "threshold_basis": basis,
                 "reference_noise_floor": floor,
+                "max_distance_to_reference": max_dist,
+                "uninformative": uninformative,
+                "uninformative_note": (
+                    f"threshold {thr:.3g} is >= {P.behavior_uninformative_ratio:.0%} of the largest distance-to-reference "
+                    f"({max_dist:.3g}) over the evaluated budgets: this metric cannot certify convergence (defaults need "
+                    "calibration)"
+                    if uninformative
+                    else None
+                ),
                 "flags": flags.tolist(),
                 "first_below": next((eval_steps[i] for i, f in enumerate(flags) if f), None),
                 "stable_step": None if stable is None else int(eval_steps[stable]),
@@ -170,7 +181,8 @@ def behavioral_convergence(
                 if ci_ok
                 else f"CI withheld / convergence not certified: {len(seeds)} seeds < {P.behavior_min_seeds_ci}",
             }
-            stable_all.append(entry["metrics"][met]["stable_step"])
+            if not uninformative:
+                stable_all.append(entry["metrics"][met]["stable_step"])
             # stabilisation (separate question): change between CONSECUTIVE checkpoints
             if len(eval_steps) >= 2:
                 cons = [
@@ -178,8 +190,11 @@ def behavioral_convergence(
                     for a, b in zip(eval_steps[:-1], eval_steps[1:])
                 ]
                 entry["stabilization"][met] = {"from": eval_steps[:-1], "to": eval_steps[1:], "mean_change": cons}
+        entry["uninformative_metrics"] = [m for m, x in entry["metrics"].items() if x["uninformative"]]
         if not metrics:
             entry["status"], entry["stable_step"] = "no_distance_data", None
+        elif not stable_all:
+            entry["status"], entry["stable_step"] = "no_informative_metric", None
         elif all(s is not None for s in stable_all):
             entry["status"], entry["stable_step"] = "converged", int(max(stable_all))
         else:
