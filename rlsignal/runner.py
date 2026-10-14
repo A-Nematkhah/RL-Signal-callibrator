@@ -9,7 +9,7 @@ from pathlib import Path
 
 from . import __version__
 from .adapters import build_adapter
-from .config import checkpoint_grid, compat_hash
+from .config import checkpoint_grid, compat_hash, snap_to_batch
 from .probe import build_probe_states, fingerprint
 from .rollout import evaluate_policy
 from .trainers import build_trainer
@@ -235,7 +235,7 @@ def refine_experiment(cfg, out_root, steps, log=print):
     kind, n_act = man["env_info"]["action_kind"], man["env_info"]["n_actions"]
     ev, pcfg = cfg["eval"], cfg.get("behavior_probe") or {}
     seeds_E = [ev["eval_seed_base"] + i for i in range(ev["n_episodes"])]
-    added, missing = 0, []
+    added, missing, mislabelled = 0, [], []
     for rid, rspec in cfg["rewards"].items():
         for seed in cfg["schedule"]["seeds"]:
             rdir = exp / "runs" / rid / f"seed{seed}"
@@ -249,6 +249,13 @@ def refine_experiment(cfg, out_root, steps, log=print):
                     continue
                 tr = build_trainer(cfg, adapter, rspec, seed)
                 tr.load(str(snap))
+                expected = snap_to_batch(step, tr.rollout_size)
+                if tr.transitions != expected:
+                    mislabelled.append(str(snap))
+                    log(
+                        f"[skip] {snap}: snapshot holds {tr.transitions} transitions, expected {expected}; not evaluated"
+                    )
+                    continue
                 eps = evaluate_policy(
                     tr,
                     adapter,
@@ -283,4 +290,4 @@ def refine_experiment(cfg, out_root, steps, log=print):
                         np.save(rdir / "probe" / f"ckpt_{step}.npy", fp)
                 added += 1
                 log(f"refined {rid}/seed{seed} @ {step}")
-    return {"evaluated": added, "missing_snapshots": missing}
+    return {"evaluated": added, "missing_snapshots": missing, "mislabelled_snapshots": mislabelled}

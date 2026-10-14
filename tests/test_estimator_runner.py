@@ -70,6 +70,26 @@ def test_refine_evaluates_snapshots_without_touching_the_training_run(tmp_path):
     assert rec["transitions"] == 96 and rec["refined_from_snapshot"]
 
 
+def test_refine_skips_a_mislabelled_snapshot_without_writing_anything(tmp_path):
+    cfg = cfg1()
+    exp, _ = run_experiment(cfg, tmp_path, log=lambda *_: None)
+    rdir = exp / "runs" / "good" / "seed0"
+    # ckpt_96.zip actually holds the model at 128 transitions
+    (rdir / "snapshots" / "ckpt_96.zip").write_bytes((rdir / "snapshots" / "ckpt_128.zip").read_bytes())
+    before = (rdir / "evals.jsonl").read_text(encoding="utf-8")
+    msgs = []
+    out = refine_experiment(cfg, tmp_path, [96, 192], log=msgs.append)
+    after = (rdir / "evals.jsonl").read_text(encoding="utf-8")
+    new = [json.loads(line) for line in after[len(before) :].splitlines() if line.strip()]
+    assert [r["checkpoint"] for r in new] == [192]  # 96 skipped, 192 evaluated
+    assert not (rdir / "probe" / "ckpt_96.npy").exists()
+    assert (rdir / "probe" / "ckpt_192.npy").exists()
+    assert out["mislabelled_snapshots"] == [str(rdir / "snapshots" / "ckpt_96.zip")]
+    assert out["evaluated"] == 2 * 2 * 2 - 1
+    skip = [m for m in msgs if "ckpt_96.zip" in m]
+    assert len(skip) == 1 and "128" in skip[0] and "\n" not in skip[0]
+
+
 def test_budget_behind_the_trained_frontier_is_skipped_not_mislabelled(tmp_path):
     cfg = cfg1()
     run_experiment(cfg, tmp_path, log=lambda *_: None)
