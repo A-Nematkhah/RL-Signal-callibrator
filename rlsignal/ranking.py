@@ -301,7 +301,7 @@ def ranking_reliability(runs, steps, candidates, criteria, ref_step, P, exclude=
     elig = [i for i, t in enumerate(steps) if t * P.min_reference_ratio <= ref_step]
     L = max(len(elig), 1)
 
-    def flags(prob, pair_p):
+    def flags(prob, pair_p, top_threshold):
         f = np.ones(T, bool)
         if use_tau:
             f &= frac_ok >= prob
@@ -309,19 +309,26 @@ def ranking_reliability(runs, steps, candidates, criteria, ref_step, P, exclude=
             f &= np.array([(pair_agree[ti] >= pair_p).mean() >= P.pair_fraction for ti in range(T)])
         else:
             f &= False
-        if P.top_set_prob is not None:
-            f &= top_prob >= max(P.top_set_prob, prob if prob > P.prob else 0)
+        if top_threshold is not None:
+            f &= top_prob >= top_threshold
         return f
 
-    nominal = flags(P.prob, P.pair_prob)
     p_adj = 1 - (1 - P.prob) / L
     pp_adj = 1 - (1 - P.pair_prob) / L
-    adjusted = flags(p_adj, pp_adj)
+    # With more than one look, the top-set requirement is raised to at least the tightened agreement probability.
+    top_adj = P.top_set_prob
+    if P.top_set_prob is not None and p_adj > P.prob:
+        top_adj = max(P.top_set_prob, p_adj)
+    nominal = flags(P.prob, P.pair_prob, P.top_set_prob)
+    adjusted = flags(p_adj, pp_adj, top_adj)
     out["looks"] = {
         "n_eligible_looks": L,
         "correction": P.looks_correction,
         "prob_nominal": P.prob,
         "prob_bonferroni": float(p_adj),
+        "pair_prob_bonferroni": float(pp_adj),
+        "top_set_prob_nominal": P.top_set_prob,
+        "top_set_prob_bonferroni": None if top_adj is None else float(top_adj),
         "note": (
             "The first budget that passes is selected among several looks, so nominal probabilities "
             "are optimistic for the selected budget (winner's curse). Persistence over later budgets "
