@@ -72,8 +72,9 @@ def run_one(cfg, adapter, man, reward_id, seed, exp: Path, deadline=None, log=pr
                                             int(pcfg.get("stride", 3)))
         (rdir / "probe").mkdir(exist_ok=True)
         idf = rdir / "probe" / "probe_id.txt"
-        if idf.exists() and idf.read_text(encoding="utf-8").strip() != pid:
-            raise IncompatibleConfigError(f"{rdir}: probe states changed (stored id {idf.read_text(encoding="utf-8").strip()} != {pid})")
+        stored_pid = idf.read_text(encoding="utf-8").strip() if idf.exists() else None
+        if stored_pid is not None and stored_pid != pid:
+            raise IncompatibleConfigError(f"{rdir}: probe states changed (stored id {stored_pid} != {pid})")
         idf.write_text(pid, encoding="utf-8")
 
     def record(ckpt, eval_set, null_idx=None):
