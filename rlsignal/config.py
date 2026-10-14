@@ -13,9 +13,31 @@ COMPAT_KEYS = ("adapter", "rewards", "algo", "eval")
 MACHINE_KEYS = ("crowdnav_path",)
 
 
+class DuplicateKeyError(ValueError):
+    pass
+
+
+class _StrictLoader(yaml.SafeLoader):
+    """SafeLoader that rejects duplicate keys in any mapping (PyYAML silently keeps the last one)."""
+
+    def construct_mapping(self, node, deep=False):
+        seen = {}
+        for key_node, _ in node.value:
+            if key_node.tag == "tag:yaml.org,2002:merge":
+                continue
+            key = self.construct_object(key_node, deep=True)
+            line = key_node.start_mark.line + 1
+            if key in seen:
+                raise DuplicateKeyError(
+                    f"{key_node.start_mark.name}: duplicate key {key!r} at line {line} (first defined at line {seen[key]})"
+                )
+            seen[key] = line
+        return super().construct_mapping(node, deep=deep)
+
+
 def load_config(path) -> dict:
     with open(path, encoding="utf-8-sig") as f:
-        return yaml.safe_load(f)
+        return yaml.load(f, Loader=_StrictLoader)
 
 
 def compat_hash(cfg: dict) -> str:

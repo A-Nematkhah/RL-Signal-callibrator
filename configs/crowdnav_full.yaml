@@ -1,6 +1,9 @@
 # FULL-horizon settings (1M transitions). Run only after the pilot passes the acceptance checks in README.
 # CrowdNav location: set $CROWDNAV_PATH, or clone it to ./CrowdNav (next to pyproject.toml), or set adapter.crowdnav_path.
 # Machine-specific paths are NOT part of the compatibility hash.
+# This grid uses the legacy `budget.mode: ranking`. To use the reference-based estimator instead, copy the documented
+# `reference`, `behavior_probe` and `estimator` sections from configs/crowdnav_pilot.yaml (they are not part of the
+# compatibility hash) and set `budget.mode: estimator`.
 name: crowdnav_full_v2
 adapter:
   name: crowdnav
@@ -61,7 +64,5 @@ ranking:
   prob: 0.8
   n_boot: 400
 budget:
-  mode: ranking                          # ranking | screening
+  mode: ranking                          # estimator | ranking (legacy) | screening
   safety_margin: 1.5
-# See configs/crowdnav_pilot.yaml for the documented `reference`, `behavior_probe` and `estimator` sections; copy them
-# here (they are not part of the compatibility hash) to use the reference-based estimator on this grid.
