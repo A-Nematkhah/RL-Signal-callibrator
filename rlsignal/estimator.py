@@ -31,16 +31,31 @@ def _snap_up(target, steps):
 def estimate_budget(runs, action_kind, fs, controls, P: EstimatorParams, behavior_boot=500):
     controls = [c for c in controls if c in runs]
     candidates = [r for r in runs if r not in controls]
-    all_runs = [r for rs in runs.values() for r in rs.values()]
-    steps = sorted(set.intersection(*[set(r.steps) for r in all_runs]))
+    labeled = [(f"{rid}/seed{r.seed}", r) for rid, rs in runs.items() for r in rs.values()]
+    per_steps = {lab: set(r.steps) for lab, r in labeled}
+    steps = sorted(set.intersection(*per_steps.values())) if per_steps else []
+    union = set.union(*per_steps.values()) if per_steps else set()
+    dropped = [
+        {"step": int(t), "missing_from": sorted(lab for lab, s in per_steps.items() if t not in s)}
+        for t in sorted(union - set(steps))
+    ]
     res = {
         "params": _params_echo(P),
         "candidates": candidates,
         "controls": controls,
         "steps": steps,
+        "dropped_steps": dropped,
         "non_claims": NON_CLAIMS,
         "caveats": [],
     }
+    if dropped:
+        res["caveats"].append(
+            "dropped budgets (present in some runs but missing from others, so excluded from the common grid): "
+            + "; ".join(f"{d['step']} lacking in {', '.join(d['missing_from'])}" for d in dropped)
+        )
+    if not steps:
+        res["decision"] = _dec("invalid_configuration", reason="no common evaluated budget across all runs")
+        return res
     ref_step = P.reference_budget or steps[-1]
     if ref_step not in steps:
         res["decision"] = _dec(
