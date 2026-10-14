@@ -1,0 +1,113 @@
+{
+  "name": "crowdnav_pilot",
+  "compat_hash": "e39931db38b0",
+  "config": {
+    "name": "crowdnav_pilot",
+    "adapter": {
+      "name": "crowdnav",
+      "crowdnav_path": "C:/Users/nematkhah/Downloads/rl-signal-calibrator/CrowdNav",
+      "kinematics": "holonomic",
+      "n_speeds": 5,
+      "n_rotations": 16,
+      "obs_mode": "ego",
+      "env_config": {}
+    },
+    "rewards": {
+      "standard": {
+        "weights": {
+          "success": 1.0,
+          "collision": -0.25,
+          "discomfort": -0.025
+        }
+      },
+      "goal_shaping": {
+        "weights": {
+          "goal_progress": 1.0,
+          "success": 1.0,
+          "collision": -1.0
+        }
+      },
+      "reckless_fast": {
+        "weights": {
+          "goal_progress": 1.0,
+          "speed": 0.1,
+          "collision": -0.01
+        }
+      },
+      "cautious_social": {
+        "weights": {
+          "collision": -1.0,
+          "discomfort": -1.0,
+          "success": 0.5
+        }
+      },
+      "null_control": {
+        "weights": {}
+      }
+    },
+    "algo": {
+      "name": "ppo_sb3",
+      "n_envs": 1,
+      "hyperparams": {
+        "n_steps": 256,
+        "batch_size": 64,
+        "n_epochs": 10,
+        "learning_rate": 0.0003,
+        "gamma": 0.99,
+        "ent_coef": 0.0
+      }
+    },
+    "eval": {
+      "n_episodes": 30,
+      "eval_seed_base": 10000,
+      "deterministic": false
+    },
+    "schedule": {
+      "seeds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "checkpoints": [
+        1000,
+        2000,
+        4000,
+        8000,
+        12000,
+        20000,
+        30000,
+        50000,
+        80000,
+        120000,
+        200000
+      ]
+    },
+    "compute": {
+      "max_wall_seconds": null,
+      "workers": 6
+    },
+    "detection": {
+      "alpha": 0.05,
+      "q": 0.6667,
+      "persist_k": 2,
+      "n_perm": 499,
+      "null_quantile": 0.95,
+      "delta_l": 0.5,
+      "n_boot": 300,
+      "discrim_alpha": 0.05,
+      "discrim_pair_frac": 0.8,
+      "min_sep_ratio": 1.25,
+      "discrim_correction": "none"
+    },
+    "budget": {
+      "mode": "screening",
+      "safety_margin": 1.5
+    }
+  },
+  "env_info": {
+    "action_kind": "discrete",
+    "n_actions": 81
+  },
+  "rlsignal_version": "0.1.0"
+}

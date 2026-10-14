@@ -1,0 +1,44 @@
+# Pre-registered HOLD-OUT validation of the recommended budget (see rlsignal/validation/holdout.py).
+# The training setup (adapter, algo, reward definitions) MUST equal configs/crowdnav_pilot.yaml; the check is automatic.
+# Fresh seeds, fresh evaluation scenarios, TRUE short runs (they stop at the last checkpoint).
+name: crowdnav_holdout_32k
+adapter:
+  name: crowdnav
+  kinematics: holonomic
+  n_speeds: 5
+  n_rotations: 16
+  obs_mode: ego
+  env_config:
+    sim: {human_num: 3}
+rewards:                                 # candidates only (controls are not needed for the validation)
+  standard:          {weights: {success: 1.0, collision: -0.25, discomfort: -0.025}}
+  goal_shaping:      {weights: {goal_progress: 1.0, success: 1.0, collision: -1.0}}
+  progress_social:   {weights: {goal_progress: 1.0, success: 1.0, collision: -1.0, discomfort: -0.5}}
+  success_collision: {weights: {success: 1.0, collision: -1.0}}
+  reckless_fast:     {weights: {goal_progress: 1.0, speed: 0.1, collision: -0.01}}
+  cautious_social:   {weights: {collision: -1.0, discomfort: -1.0, success: 0.5}}
+  speed_only:        {weights: {speed: 1.0}}
+algo:
+  name: ppo_sb3
+  n_envs: 8
+  hyperparams: {n_steps: 128, batch_size: 128, n_epochs: 10, learning_rate: 0.0003, gamma: 0.99, ent_coef: 0.01}
+eval:
+  n_episodes: 30                         # same evaluation size as the claim being tested
+  eval_seed_base: 70000                  # scenarios never used before
+  n_null_sets: 0
+  eval_rng_seed: 54321
+  deterministic: false
+schedule:
+  seeds: [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115]   # 16 NEW seeds
+  checkpoints: [8192, 16384, 32768]      # 8192 is the negative control: the test must NOT confirm it
+compute:
+  max_wall_seconds: null
+  workers: 6
+holdout:
+  reference_config: configs/crowdnav_pilot.yaml
+  reference_results: results             # where the reference experiment lives
+  budgets: [8192, 16384, 32768]
+  experiment_seeds: 4                    # size of the screening experiment being validated
+  n_outer: 200
+  n_inner: 100
+  targets: {tau_threshold: 0.6, prob_tau: 0.8, prob_top: 0.8, pairs_prob: 0.8, pair_fraction: 0.9, regret_max: 0.05, prob_regret: 0.8}

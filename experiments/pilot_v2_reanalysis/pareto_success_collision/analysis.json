@@ -1,0 +1,4218 @@
+{
+  "calibration": {
+    "behaviour_effect_floor": 0.18152318602009657,
+    "learning_effect_floor_z": {
+      "cautious_social": 0.47717934646552246,
+      "goal_shaping": 0.4999791223225788,
+      "null_control": 0.25,
+      "progress_social": 0.513085153919942,
+      "random_control": 0.25,
+      "reckless_fast": 0.405834702037042,
+      "speed_only": 0.2852424636905073,
+      "standard": 0.43142138366771193,
+      "success_collision": 0.4175626902695092
+    },
+    "null_false_positive_rate": 0.0,
+    "n_null_tests": 64,
+    "n_null_independent_seeds": 8,
+    "n_null_unique_values": 64,
+    "null_quantile": 0.95,
+    "n_features": 10,
+    "features": [
+      "act_entropy",
+      "length",
+      "m_collision",
+      "m_discomfort_frac",
+      "m_frac_stopped",
+      "m_goal_progress_frac",
+      "m_mean_heading_cos",
+      "m_mean_speed_frac",
+      "m_min_dist_to_human",
+      "m_success"
+    ],
+    "controls": [
+      "null_control",
+      "random_control"
+    ]
+  },
+  "rewards": {
+    "cautious_social": {
+      "n_seeds": 8,
+      "is_control": false,
+      "checkpoints": [
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+        100352,
+        150528,
+        200704,
+        300032
+      ],
+      "behavioral_change_onset_step": {
+        "step": 16384,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          8192,
+          16384
+        ],
+        "ci_note": null,
+        "transient": false
+      },
+      "behavioral_stable_onset_step": {
+        "step": 16384,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          8192,
+          16384
+        ],
+        "ci_note": null
+      },
+      "learning_onset_step": {
+        "step": 200704,
+        "boot_detect_frac": 0.69,
+        "ci": [
+          16384,
+          200704
+        ],
+        "ci_note": null
+      },
+      "learning_stable_onset_step": {
+        "step": null,
+        "boot_detect_frac": 0.06666666666666667,
+        "ci": [
+          16384,
+          65536
+        ],
+        "ci_note": null
+      },
+      "learning_change_point": {
+        "step": null,
+        "effect": 0.4090261194449294
+      },
+      "learning_direction": "increase",
+      "signal_vs_control": {
+        "controls": [
+          "null_control",
+          "random_control"
+        ],
+        "first": 16384,
+        "stable": 16384,
+        "flags_per_control": {
+          "null_control": [
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "random_control": [
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "flags_all_controls": [
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "reason_if_none": []
+    },
+    "goal_shaping": {
+      "n_seeds": 8,
+      "is_control": false,
+      "checkpoints": [
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+        100352,
+        150528,
+        200704,
+        300032
+      ],
+      "behavioral_change_onset_step": {
+        "step": 2048,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          2048
+        ],
+        "ci_note": null,
+        "transient": false
+      },
+      "behavioral_stable_onset_step": {
+        "step": 2048,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          2048
+        ],
+        "ci_note": null
+      },
+      "learning_onset_step": {
+        "step": 2048,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          2048
+        ],
+        "ci_note": null
+      },
+      "learning_stable_onset_step": {
+        "step": 2048,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          2048
+        ],
+        "ci_note": null
+      },
+      "learning_change_point": {
+        "step": 8192,
+        "effect": 4.586693851988643
+      },
+      "learning_direction": "increase",
+      "signal_vs_control": {
+        "controls": [
+          "null_control",
+          "random_control"
+        ],
+        "first": 2048,
+        "stable": 2048,
+        "flags_per_control": {
+          "null_control": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "random_control": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "flags_all_controls": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "reason_if_none": []
+    },
+    "null_control": {
+      "n_seeds": 8,
+      "is_control": true,
+      "checkpoints": [
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+        100352,
+        150528,
+        200704,
+        300032
+      ],
+      "behavioral_change_onset_step": {
+        "step": 65536,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          16384,
+          100352
+        ],
+        "ci_note": null,
+        "transient": false
+      },
+      "behavioral_stable_onset_step": {
+        "step": 65536,
+        "boot_detect_frac": 0.95,
+        "ci": [
+          16384,
+          100352
+        ],
+        "ci_note": null
+      },
+      "learning_onset_step": {
+        "step": null,
+        "boot_detect_frac": 0.0,
+        "ci": null,
+        "ci_note": null
+      },
+      "learning_stable_onset_step": {
+        "step": null,
+        "boot_detect_frac": 0.0,
+        "ci": null,
+        "ci_note": null
+      },
+      "learning_change_point": {
+        "step": null,
+        "effect": 0.0
+      },
+      "learning_direction": null,
+      "reason_if_none": [
+        "control run drifts away from pi_0 (expected: this is the drift level other rewards must exceed)"
+      ]
+    },
+    "progress_social": {
+      "n_seeds": 8,
+      "is_control": false,
+      "checkpoints": [
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+        100352,
+        150528,
+        200704,
+        300032
+      ],
+      "behavioral_change_onset_step": {
+        "step": 2048,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          2048
+        ],
+        "ci_note": null,
+        "transient": false
+      },
+      "behavioral_stable_onset_step": {
+        "step": 2048,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          2048
+        ],
+        "ci_note": null
+      },
+      "learning_onset_step": {
+        "step": 2048,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          2048
+        ],
+        "ci_note": null
+      },
+      "learning_stable_onset_step": {
+        "step": 2048,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          2048
+        ],
+        "ci_note": null
+      },
+      "learning_change_point": {
+        "step": 8192,
+        "effect": 4.019468062105421
+      },
+      "learning_direction": "increase",
+      "signal_vs_control": {
+        "controls": [
+          "null_control",
+          "random_control"
+        ],
+        "first": 2048,
+        "stable": 2048,
+        "flags_per_control": {
+          "null_control": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "random_control": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "flags_all_controls": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "reason_if_none": []
+    },
+    "random_control": {
+      "n_seeds": 8,
+      "is_control": true,
+      "checkpoints": [
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+        100352,
+        150528,
+        200704,
+        300032
+      ],
+      "behavioral_change_onset_step": {
+        "step": 65536,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          8192,
+          100352
+        ],
+        "ci_note": null,
+        "transient": false
+      },
+      "behavioral_stable_onset_step": {
+        "step": 65536,
+        "boot_detect_frac": 0.72,
+        "ci": [
+          16384,
+          100352
+        ],
+        "ci_note": null
+      },
+      "learning_onset_step": {
+        "step": null,
+        "boot_detect_frac": 0.0,
+        "ci": null,
+        "ci_note": null
+      },
+      "learning_stable_onset_step": {
+        "step": null,
+        "boot_detect_frac": 0.0,
+        "ci": null,
+        "ci_note": null
+      },
+      "learning_change_point": {
+        "step": null,
+        "effect": 0.03342020281266019
+      },
+      "learning_direction": null,
+      "reason_if_none": [
+        "control run drifts away from pi_0 (expected: this is the drift level other rewards must exceed)"
+      ]
+    },
+    "reckless_fast": {
+      "n_seeds": 8,
+      "is_control": false,
+      "checkpoints": [
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+        100352,
+        150528,
+        200704,
+        300032
+      ],
+      "behavioral_change_onset_step": {
+        "step": 2048,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          2048
+        ],
+        "ci_note": null,
+        "transient": false
+      },
+      "behavioral_stable_onset_step": {
+        "step": 2048,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          2048
+        ],
+        "ci_note": null
+      },
+      "learning_onset_step": {
+        "step": 2048,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          2048
+        ],
+        "ci_note": null
+      },
+      "learning_stable_onset_step": {
+        "step": 2048,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          2048
+        ],
+        "ci_note": null
+      },
+      "learning_change_point": {
+        "step": 8192,
+        "effect": 2.427974433671733
+      },
+      "learning_direction": "increase",
+      "signal_vs_control": {
+        "controls": [
+          "null_control",
+          "random_control"
+        ],
+        "first": 2048,
+        "stable": 2048,
+        "flags_per_control": {
+          "null_control": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "random_control": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "flags_all_controls": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "reason_if_none": []
+    },
+    "speed_only": {
+      "n_seeds": 8,
+      "is_control": false,
+      "checkpoints": [
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+        100352,
+        150528,
+        200704,
+        300032
+      ],
+      "behavioral_change_onset_step": {
+        "step": 4096,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          4096,
+          4096
+        ],
+        "ci_note": null,
+        "transient": false
+      },
+      "behavioral_stable_onset_step": {
+        "step": 4096,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          4096,
+          4096
+        ],
+        "ci_note": null
+      },
+      "learning_onset_step": {
+        "step": 4096,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          4096
+        ],
+        "ci_note": null
+      },
+      "learning_stable_onset_step": {
+        "step": 4096,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          2048,
+          4096
+        ],
+        "ci_note": null
+      },
+      "learning_change_point": {
+        "step": 16384,
+        "effect": 3.5680250180812294
+      },
+      "learning_direction": "increase",
+      "signal_vs_control": {
+        "controls": [
+          "null_control",
+          "random_control"
+        ],
+        "first": 4096,
+        "stable": 4096,
+        "flags_per_control": {
+          "null_control": [
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "random_control": [
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "flags_all_controls": [
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "reason_if_none": []
+    },
+    "standard": {
+      "n_seeds": 8,
+      "is_control": false,
+      "checkpoints": [
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+        100352,
+        150528,
+        200704,
+        300032
+      ],
+      "behavioral_change_onset_step": {
+        "step": 16384,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          16384,
+          65536
+        ],
+        "ci_note": null,
+        "transient": false
+      },
+      "behavioral_stable_onset_step": {
+        "step": 16384,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          16384,
+          65536
+        ],
+        "ci_note": null
+      },
+      "learning_onset_step": {
+        "step": 200704,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          65536,
+          300032
+        ],
+        "ci_note": null
+      },
+      "learning_stable_onset_step": {
+        "step": null,
+        "boot_detect_frac": 0.05333333333333334,
+        "ci": [
+          65536,
+          100352
+        ],
+        "ci_note": null
+      },
+      "learning_change_point": {
+        "step": 16384,
+        "effect": 0.4317350926140689
+      },
+      "learning_direction": "increase",
+      "signal_vs_control": {
+        "controls": [
+          "null_control",
+          "random_control"
+        ],
+        "first": 65536,
+        "stable": 65536,
+        "flags_per_control": {
+          "null_control": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "random_control": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "flags_all_controls": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      "reason_if_none": []
+    },
+    "success_collision": {
+      "n_seeds": 8,
+      "is_control": false,
+      "checkpoints": [
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+        100352,
+        150528,
+        200704,
+        300032
+      ],
+      "behavioral_change_onset_step": {
+        "step": 16384,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          16384,
+          32768
+        ],
+        "ci_note": null,
+        "transient": false
+      },
+      "behavioral_stable_onset_step": {
+        "step": 16384,
+        "boot_detect_frac": 1.0,
+        "ci": [
+          16384,
+          32768
+        ],
+        "ci_note": null
+      },
+      "learning_onset_step": {
+        "step": 100352,
+        "boot_detect_frac": 0.9533333333333334,
+        "ci": [
+          65536,
+          300032
+        ],
+        "ci_note": null
+      },
+      "learning_stable_onset_step": {
+        "step": null,
+        "boot_detect_frac": 0.22,
+        "ci": [
+          65536,
+          100352
+        ],
+        "ci_note": null
+      },
+      "learning_change_point": {
+        "step": 16384,
+        "effect": 0.4551355854050779
+      },
+      "learning_direction": "increase",
+      "signal_vs_control": {
+        "controls": [
+          "null_control",
+          "random_control"
+        ],
+        "first": 32768,
+        "stable": 32768,
+        "flags_per_control": {
+          "null_control": [
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false
+          ],
+          "random_control": [
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "flags_all_controls": [
+          false,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ]
+      },
+      "reason_if_none": []
+    }
+  },
+  "discrimination": {
+    "pair_flagged_fraction": [
+      0.5,
+      0.6388888888888888,
+      0.7222222222222222,
+      0.7777777777777778,
+      0.8055555555555556,
+      0.8611111111111112,
+      0.8611111111111112,
+      0.8611111111111112,
+      0.8333333333333334,
+      0.8333333333333334
+    ],
+    "pair_onsets": {
+      "cautious_social|goal_shaping": 2048,
+      "cautious_social|null_control": 16384,
+      "cautious_social|progress_social": 2048,
+      "cautious_social|random_control": 8192,
+      "cautious_social|reckless_fast": 2048,
+      "cautious_social|speed_only": 4096,
+      "cautious_social|standard": null,
+      "cautious_social|success_collision": null,
+      "goal_shaping|null_control": 2048,
+      "goal_shaping|progress_social": null,
+      "goal_shaping|random_control": 2048,
+      "goal_shaping|reckless_fast": 8192,
+      "goal_shaping|speed_only": 2048,
+      "goal_shaping|standard": 2048,
+      "goal_shaping|success_collision": 2048,
+      "null_control|progress_social": 2048,
+      "null_control|random_control": null,
+      "null_control|reckless_fast": 2048,
+      "null_control|speed_only": 4096,
+      "null_control|standard": 65536,
+      "null_control|success_collision": 32768,
+      "progress_social|random_control": 2048,
+      "progress_social|reckless_fast": 8192,
+      "progress_social|speed_only": 2048,
+      "progress_social|standard": 2048,
+      "progress_social|success_collision": 2048,
+      "random_control|reckless_fast": 2048,
+      "random_control|speed_only": 4096,
+      "random_control|standard": 65536,
+      "random_control|success_collision": 32768,
+      "reckless_fast|speed_only": 2048,
+      "reckless_fast|standard": 2048,
+      "reckless_fast|success_collision": 2048,
+      "speed_only|standard": 4096,
+      "speed_only|success_collision": 4096,
+      "standard|success_collision": null
+    },
+    "never_distinguished": [
+      "cautious_social|standard",
+      "cautious_social|success_collision",
+      "goal_shaping|progress_social",
+      "null_control|random_control",
+      "standard|success_collision"
+    ],
+    "checkpoints": [
+      2048,
+      4096,
+      8192,
+      16384,
+      32768,
+      65536,
+      100352,
+      150528,
+      200704,
+      300032
+    ],
+    "power_note": "smallest attainable per-test p ~0.0002 with 8 vs 8 seeds"
+  },
+  "ranking": {
+    "candidates": [
+      "cautious_social",
+      "goal_shaping",
+      "progress_social",
+      "reckless_fast",
+      "speed_only",
+      "standard",
+      "success_collision"
+    ],
+    "steps": [
+      2048,
+      4096,
+      8192,
+      16384,
+      32768,
+      65536,
+      100352,
+      150528,
+      200704,
+      300032
+    ],
+    "first": 65536,
+    "stable": 65536,
+    "reason": null,
+    "reference_step": 300032,
+    "tau_threshold": 0.6,
+    "prob": 0.8,
+    "reference_reliability_tau_median": 0.9047619047619049,
+    "reference_ranking_reliable": true,
+    "tau_median": [
+      0.04761904761904762,
+      -0.23809523809523814,
+      -0.14285714285714288,
+      0.6190476190476191,
+      0.5238095238095238,
+      0.7142857142857143,
+      0.8095238095238096,
+      0.8095238095238096,
+      0.8095238095238096,
+      0.9047619047619049
+    ],
+    "frac_tau_ok": [
+      0.0,
+      0.0,
+      0.0,
+      0.6525,
+      0.4525,
+      0.92,
+      0.965,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "p_top1": [
+      0.135,
+      0.0,
+      0.0,
+      0.4675,
+      0.6525,
+      0.3425,
+      0.5725,
+      0.345,
+      0.5625,
+      0.345
+    ],
+    "mean_reference_return_by_candidate": {
+      "cautious_social": -0.006036769963696988,
+      "goal_shaping": 0.6708497782355893,
+      "progress_social": 0.6850677555475356,
+      "reckless_fast": -0.05609757294882149,
+      "speed_only": -0.01776009118776066,
+      "standard": -0.003103898405989333,
+      "success_collision": 0.04887269607533679
+    }
+  },
+  "estimator": {
+    "params": {
+      "rule": "pareto",
+      "pareto_eps": 0.0,
+      "n_exp_seeds": null,
+      "n_boot": 500,
+      "resample_episodes": true,
+      "seed": 0,
+      "tau_threshold": 0.6,
+      "prob": 0.8,
+      "min_candidates_for_tau": 3,
+      "resolve_prob": 0.9,
+      "pair_prob": 0.8,
+      "pair_fraction": 0.9,
+      "top_set_prob": 0.8,
+      "persist_k": 2,
+      "persist_ratio": 2.0,
+      "looks_correction": "none",
+      "min_reference_ratio": 3.0,
+      "min_seeds": 6,
+      "min_eval_episodes": 30,
+      "safety_margin": 1.5,
+      "reference_budget": null,
+      "require_stable_reference": true,
+      "uncertain_reference": "block",
+      "ref_max_between_seed_sd": 0.15,
+      "ref_max_probe_js": 0.15,
+      "ref_behavior_blocks": false,
+      "ref_trend_fraction": 0.5,
+      "ref_max_trend": 0.05,
+      "behavior_metrics": [
+        "probe_js",
+        "action_marginal_js",
+        "feature_energy",
+        "task_gap"
+      ],
+      "behavior_threshold_mode": "floor_relative",
+      "behavior_floor_factor": 1.0,
+      "behavior_thresholds": {
+        "probe_js": 0.05,
+        "action_marginal_js": 0.02,
+        "task_gap": 0.1,
+        "feature_energy": null
+      },
+      "behavior_ci": 0.95,
+      "behavior_min_seeds_ci": 6,
+      "criteria": [
+        {
+          "name": "success",
+          "source": "metric",
+          "key": "success",
+          "direction": "higher",
+          "weight": 1.0
+        },
+        {
+          "name": "collision",
+          "source": "metric",
+          "key": "collision",
+          "direction": "lower",
+          "weight": 1.0
+        }
+      ]
+    },
+    "candidates": [
+      "cautious_social",
+      "goal_shaping",
+      "progress_social",
+      "reckless_fast",
+      "speed_only",
+      "standard",
+      "success_collision"
+    ],
+    "controls": [
+      "null_control",
+      "random_control"
+    ],
+    "steps": [
+      2048,
+      4096,
+      8192,
+      16384,
+      32768,
+      65536,
+      100352,
+      150528,
+      200704,
+      300032
+    ],
+    "non_claims": "No policy is claimed optimal or converged because of its budget, a plateau, or similarity to a reference. Reference policies are large-budget policies of the same reward, audited but not proven converged. The budget is conditional on the experiment design (seeds, episodes, ranking rule).",
+    "caveats": [
+      "reference behaviour differs across seeds for: cautious_social, goal_shaping, progress_social, speed_only, standard, success_collision (reported; does not block a task-criterion ranking)",
+      "no dedicated reference evaluation (eval_set 'R') stored: the reference ranking reuses the same evaluation scenarios as the budgets; scenario noise is then shared and agreement is somewhat optimistic",
+      "even an experiment at the reference budget does not reproduce the reference ranking with the required probability: more seeds, a larger reference budget, more evaluation episodes, or more spread between candidates is needed",
+      "The first budget that passes is selected among several looks, so nominal probabilities are optimistic for the selected budget (winner's curse). Persistence over later budgets is required, and the Bonferroni-tightened result is reported alongside; neither is an exact family-wise guarantee."
+    ],
+    "reference_step": 300032,
+    "skipped_criteria": [],
+    "reference": {
+      "per_reward": {
+        "cautious_social": {
+          "n_seeds": 8,
+          "reference_step": 300032,
+          "primary_criterion": "success",
+          "reasons": [
+            "reference behaviours differ across seeds: mean JS 0.214 bits > 0.15"
+          ],
+          "performance_reasons": [],
+          "behavior_reasons": [
+            "reference behaviours differ across seeds: mean JS 0.214 bits > 0.15"
+          ],
+          "primary_by_seed": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "primary_mean": 0.0,
+          "between_seed_sd": 0.0,
+          "eval_se_per_seed": 0.0,
+          "cross_seed_js_pooled_actions": 0.21410910124169055,
+          "behaviour_dispersion_source": "pooled action histograms (no probe states stored; coarser)",
+          "trend": {
+            "from_step": 150528,
+            "to_step": 300032,
+            "mean_change": 0.0,
+            "ci_level": 0.9928571428571429,
+            "ci": [
+              0.0,
+              0.0
+            ]
+          },
+          "vs_controls": {
+            "better_by": 0.0,
+            "z": null,
+            "better_than_controls": false
+          },
+          "performance_status": "stable",
+          "behavior_status": "uncertain",
+          "status": "uncertain",
+          "blocks_ranking": false
+        },
+        "goal_shaping": {
+          "n_seeds": 8,
+          "reference_step": 300032,
+          "primary_criterion": "success",
+          "reasons": [
+            "reference behaviours differ across seeds: mean JS 0.179 bits > 0.15"
+          ],
+          "performance_reasons": [],
+          "behavior_reasons": [
+            "reference behaviours differ across seeds: mean JS 0.179 bits > 0.15"
+          ],
+          "primary_by_seed": [
+            0.7,
+            0.8,
+            0.8333333333333334,
+            0.6666666666666666,
+            0.7666666666666667,
+            0.7333333333333333,
+            0.7,
+            0.7333333333333333
+          ],
+          "primary_mean": 0.7416666666666667,
+          "between_seed_sd": 0.055634864026418714,
+          "eval_se_per_seed": 0.08049854652422579,
+          "cross_seed_js_pooled_actions": 0.17904893229362182,
+          "behaviour_dispersion_source": "pooled action histograms (no probe states stored; coarser)",
+          "trend": {
+            "from_step": 150528,
+            "to_step": 300032,
+            "mean_change": 0.020833333333333343,
+            "ci_level": 0.9928571428571429,
+            "ci": [
+              -0.07645662728266363,
+              0.11812329394933031
+            ]
+          },
+          "vs_controls": {
+            "better_by": 0.7416666666666667,
+            "z": 37.705675285266366,
+            "better_than_controls": true
+          },
+          "performance_status": "stable",
+          "behavior_status": "uncertain",
+          "status": "uncertain",
+          "blocks_ranking": false
+        },
+        "progress_social": {
+          "n_seeds": 8,
+          "reference_step": 300032,
+          "primary_criterion": "success",
+          "reasons": [
+            "reference behaviours differ across seeds: mean JS 0.169 bits > 0.15"
+          ],
+          "performance_reasons": [],
+          "behavior_reasons": [
+            "reference behaviours differ across seeds: mean JS 0.169 bits > 0.15"
+          ],
+          "primary_by_seed": [
+            0.7666666666666667,
+            0.8,
+            0.7,
+            0.7333333333333333,
+            0.6666666666666666,
+            0.7666666666666667,
+            0.7333333333333333,
+            0.8333333333333334
+          ],
+          "primary_mean": 0.75,
+          "between_seed_sd": 0.05345224838248491,
+          "eval_se_per_seed": 0.0796790501374309,
+          "cross_seed_js_pooled_actions": 0.16916991340139664,
+          "behaviour_dispersion_source": "pooled action histograms (no probe states stored; coarser)",
+          "trend": {
+            "from_step": 150528,
+            "to_step": 300032,
+            "mean_change": 0.05833333333333336,
+            "ci_level": 0.9928571428571429,
+            "ci": [
+              -0.019174858522875232,
+              0.13584152518954196
+            ]
+          },
+          "vs_controls": {
+            "better_by": 0.75,
+            "z": 39.68626966596883,
+            "better_than_controls": true
+          },
+          "performance_status": "stable",
+          "behavior_status": "uncertain",
+          "status": "uncertain",
+          "blocks_ranking": false
+        },
+        "reckless_fast": {
+          "n_seeds": 8,
+          "reference_step": 300032,
+          "primary_criterion": "success",
+          "reasons": [],
+          "performance_reasons": [],
+          "behavior_reasons": [],
+          "primary_by_seed": [
+            0.0,
+            0.0,
+            0.0,
+            0.03333333333333333,
+            0.0,
+            0.03333333333333333,
+            0.0,
+            0.0
+          ],
+          "primary_mean": 0.008333333333333333,
+          "between_seed_sd": 0.015430334996209192,
+          "eval_se_per_seed": 0.008333333333333331,
+          "cross_seed_js_pooled_actions": 0.12010150819140217,
+          "behaviour_dispersion_source": "pooled action histograms (no probe states stored; coarser)",
+          "trend": {
+            "from_step": 150528,
+            "to_step": 300032,
+            "mean_change": 0.008333333333333333,
+            "ci_level": 0.9928571428571429,
+            "ci": [
+              -0.012139313996904417,
+              0.028805980663571082
+            ]
+          },
+          "vs_controls": {
+            "better_by": 0.008333333333333333,
+            "z": 1.5275252316519463,
+            "better_than_controls": false
+          },
+          "performance_status": "stable",
+          "behavior_status": "stable",
+          "status": "stable",
+          "blocks_ranking": false
+        },
+        "speed_only": {
+          "n_seeds": 8,
+          "reference_step": 300032,
+          "primary_criterion": "success",
+          "reasons": [
+            "reference behaviours differ across seeds: mean JS 0.277 bits > 0.15"
+          ],
+          "performance_reasons": [],
+          "behavior_reasons": [
+            "reference behaviours differ across seeds: mean JS 0.277 bits > 0.15"
+          ],
+          "primary_by_seed": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "primary_mean": 0.0,
+          "between_seed_sd": 0.0,
+          "eval_se_per_seed": 0.0,
+          "cross_seed_js_pooled_actions": 0.2770901824936846,
+          "behaviour_dispersion_source": "pooled action histograms (no probe states stored; coarser)",
+          "trend": {
+            "from_step": 150528,
+            "to_step": 300032,
+            "mean_change": 0.0,
+            "ci_level": 0.9928571428571429,
+            "ci": [
+              0.0,
+              0.0
+            ]
+          },
+          "vs_controls": {
+            "better_by": 0.0,
+            "z": null,
+            "better_than_controls": false
+          },
+          "performance_status": "stable",
+          "behavior_status": "uncertain",
+          "status": "uncertain",
+          "blocks_ranking": false
+        },
+        "standard": {
+          "n_seeds": 8,
+          "reference_step": 300032,
+          "primary_criterion": "success",
+          "reasons": [
+            "reference behaviours differ across seeds: mean JS 0.215 bits > 0.15"
+          ],
+          "performance_reasons": [],
+          "behavior_reasons": [
+            "reference behaviours differ across seeds: mean JS 0.215 bits > 0.15"
+          ],
+          "primary_by_seed": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "primary_mean": 0.0,
+          "between_seed_sd": 0.0,
+          "eval_se_per_seed": 0.0,
+          "cross_seed_js_pooled_actions": 0.21538813409692464,
+          "behaviour_dispersion_source": "pooled action histograms (no probe states stored; coarser)",
+          "trend": {
+            "from_step": 150528,
+            "to_step": 300032,
+            "mean_change": 0.0,
+            "ci_level": 0.9928571428571429,
+            "ci": [
+              0.0,
+              0.0
+            ]
+          },
+          "vs_controls": {
+            "better_by": 0.0,
+            "z": null,
+            "better_than_controls": false
+          },
+          "performance_status": "stable",
+          "behavior_status": "uncertain",
+          "status": "uncertain",
+          "blocks_ranking": false
+        },
+        "success_collision": {
+          "n_seeds": 8,
+          "reference_step": 300032,
+          "primary_criterion": "success",
+          "reasons": [
+            "reference seeds disagree on success: between-seed SD 0.153 > 0.15",
+            "reference behaviours differ across seeds: mean JS 0.219 bits > 0.15"
+          ],
+          "performance_reasons": [
+            "reference seeds disagree on success: between-seed SD 0.153 > 0.15"
+          ],
+          "behavior_reasons": [
+            "reference behaviours differ across seeds: mean JS 0.219 bits > 0.15"
+          ],
+          "primary_by_seed": [
+            0.0,
+            0.0,
+            0.43333333333333335,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "primary_mean": 0.05416666666666667,
+          "between_seed_sd": 0.15320646925708528,
+          "eval_se_per_seed": 0.011502331930819213,
+          "cross_seed_js_pooled_actions": 0.21853968144390776,
+          "behaviour_dispersion_source": "pooled action histograms (no probe states stored; coarser)",
+          "trend": {
+            "from_step": 150528,
+            "to_step": 300032,
+            "mean_change": 0.025,
+            "ci_level": 0.9928571428571429,
+            "ci": [
+              -0.06881745606695008,
+              0.1188174560669501
+            ]
+          },
+          "vs_controls": {
+            "better_by": 0.05416666666666667,
+            "z": 1.0000000000000002,
+            "better_than_controls": false
+          },
+          "performance_status": "uncertain",
+          "behavior_status": "uncertain",
+          "status": "uncertain",
+          "blocks_ranking": true
+        }
+      },
+      "uncertain_rewards": [
+        "success_collision"
+      ],
+      "behavior_uncertain_rewards": [
+        "cautious_social",
+        "goal_shaping",
+        "progress_social",
+        "speed_only",
+        "standard",
+        "success_collision"
+      ],
+      "step": 300032,
+      "ratio_to_max_eligible_budget": 3.0
+    },
+    "ranking": {
+      "candidates": [
+        "cautious_social",
+        "goal_shaping",
+        "progress_social",
+        "reckless_fast",
+        "speed_only",
+        "standard",
+        "success_collision"
+      ],
+      "steps": [
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+        100352,
+        150528,
+        200704,
+        300032
+      ],
+      "ref_step": 300032,
+      "criteria": [
+        {
+          "name": "success",
+          "source": "metric",
+          "key": "success",
+          "direction": "higher",
+          "weight": 1.0
+        },
+        {
+          "name": "collision",
+          "source": "metric",
+          "key": "collision",
+          "direction": "lower",
+          "weight": 1.0
+        }
+      ],
+      "rule": "pareto",
+      "status": "reference_ranking_unreliable",
+      "notes": [
+        "no dedicated reference evaluation (eval_set 'R') stored: the reference ranking reuses the same evaluation scenarios as the budgets; scenario noise is then shared and agreement is somewhat optimistic",
+        "even an experiment at the reference budget does not reproduce the reference ranking with the required probability: more seeds, a larger reference budget, more evaluation episodes, or more spread between candidates is needed"
+      ],
+      "design": {
+        "n_seeds": 8,
+        "n_exp_seeds": 4,
+        "n_reference_seeds": 4,
+        "n_candidates": 7,
+        "n_boot": 500,
+        "n_partitions": 70,
+        "n_eval_episodes": 30,
+        "n_reference_episodes": 30,
+        "reference_eval_disjoint_larger_set": false
+      },
+      "excluded_candidates": [],
+      "reference_ranking": {
+        "n_pairs": 21,
+        "n_resolved_pairs": 1,
+        "pairs": [
+          {
+            "a": "cautious_social",
+            "b": "goal_shaping",
+            "p_a_better": 0.172,
+            "p_b_better": 0.384,
+            "resolved": false
+          },
+          {
+            "a": "cautious_social",
+            "b": "progress_social",
+            "p_a_better": 0.142,
+            "p_b_better": 0.47,
+            "resolved": false
+          },
+          {
+            "a": "cautious_social",
+            "b": "reckless_fast",
+            "p_a_better": 0.674,
+            "p_b_better": 0.13,
+            "resolved": false
+          },
+          {
+            "a": "cautious_social",
+            "b": "speed_only",
+            "p_a_better": 0.852,
+            "p_b_better": 0.002,
+            "resolved": false
+          },
+          {
+            "a": "cautious_social",
+            "b": "standard",
+            "p_a_better": 0.188,
+            "p_b_better": 0.544,
+            "resolved": false
+          },
+          {
+            "a": "cautious_social",
+            "b": "success_collision",
+            "p_a_better": 0.084,
+            "p_b_better": 0.646,
+            "resolved": false
+          },
+          {
+            "a": "goal_shaping",
+            "b": "progress_social",
+            "p_a_better": 0.364,
+            "p_b_better": 0.538,
+            "resolved": false
+          },
+          {
+            "a": "goal_shaping",
+            "b": "reckless_fast",
+            "p_a_better": 0.676,
+            "p_b_better": 0.108,
+            "resolved": false
+          },
+          {
+            "a": "goal_shaping",
+            "b": "speed_only",
+            "p_a_better": 0.84,
+            "p_b_better": 0.024,
+            "resolved": false
+          },
+          {
+            "a": "goal_shaping",
+            "b": "standard",
+            "p_a_better": 0.198,
+            "p_b_better": 0.322,
+            "resolved": false
+          },
+          {
+            "a": "goal_shaping",
+            "b": "success_collision",
+            "p_a_better": 0.048,
+            "p_b_better": 0.454,
+            "resolved": false
+          },
+          {
+            "a": "progress_social",
+            "b": "reckless_fast",
+            "p_a_better": 0.74,
+            "p_b_better": 0.046,
+            "resolved": false
+          },
+          {
+            "a": "progress_social",
+            "b": "speed_only",
+            "p_a_better": 0.824,
+            "p_b_better": 0.034,
+            "resolved": false
+          },
+          {
+            "a": "progress_social",
+            "b": "standard",
+            "p_a_better": 0.28,
+            "p_b_better": 0.262,
+            "resolved": false
+          },
+          {
+            "a": "progress_social",
+            "b": "success_collision",
+            "p_a_better": 0.098,
+            "p_b_better": 0.346,
+            "resolved": false
+          },
+          {
+            "a": "reckless_fast",
+            "b": "speed_only",
+            "p_a_better": 0.318,
+            "p_b_better": 0.56,
+            "resolved": false
+          },
+          {
+            "a": "reckless_fast",
+            "b": "standard",
+            "p_a_better": 0.102,
+            "p_b_better": 0.734,
+            "resolved": false
+          },
+          {
+            "a": "reckless_fast",
+            "b": "success_collision",
+            "p_a_better": 0.054,
+            "p_b_better": 0.78,
+            "resolved": false
+          },
+          {
+            "a": "speed_only",
+            "b": "standard",
+            "p_a_better": 0.048,
+            "p_b_better": 0.864,
+            "resolved": false
+          },
+          {
+            "a": "speed_only",
+            "b": "success_collision",
+            "p_a_better": 0.01,
+            "p_b_better": 0.932,
+            "resolved": true
+          },
+          {
+            "a": "standard",
+            "b": "success_collision",
+            "p_a_better": 0.078,
+            "p_b_better": 0.326,
+            "resolved": false
+          }
+        ],
+        "mean_score_by_candidate": {
+          "cautious_social": -0.796,
+          "goal_shaping": -0.538,
+          "progress_social": -0.364,
+          "reckless_fast": -1.866,
+          "speed_only": -1.81,
+          "standard": -0.454,
+          "success_collision": -0.138
+        },
+        "frac_replicates_all_tied": 0.0,
+        "top_set": [
+          "cautious_social",
+          "goal_shaping",
+          "progress_social",
+          "reckless_fast",
+          "standard",
+          "success_collision"
+        ]
+      },
+      "per_step": {
+        "tau_median": [
+          -0.21165744798852815,
+          0.0,
+          0.11664236870396087,
+          0.12393636305701153,
+          0.02782074420373286,
+          0.2782074420373286,
+          0.3529411764705882,
+          0.411764705882353,
+          0.4210526315789473,
+          0.4000816826662603
+        ],
+        "tau_ci95": [
+          [
+            -0.7391225221858996,
+            0.5499957497387427
+          ],
+          [
+            -0.6120563724821229,
+            0.6375794119163515
+          ],
+          [
+            -0.4338609156373123,
+            0.7025683444593704
+          ],
+          [
+            -0.5882352941176471,
+            0.733745472115308
+          ],
+          [
+            -0.6748103650379781,
+            0.6676978608895886
+          ],
+          [
+            -0.5131145264895363,
+            0.7925331785380577
+          ],
+          [
+            -0.3586438635396416,
+            0.8459250102977233
+          ],
+          [
+            -0.3140877260742599,
+            0.9258200997725515
+          ],
+          [
+            -0.29335352529003716,
+            0.8664507707405499
+          ],
+          [
+            -0.4086721463999796,
+            0.9600929160082864
+          ]
+        ],
+        "frac_tau_ok": [
+          0.016,
+          0.03,
+          0.04,
+          0.074,
+          0.042,
+          0.126,
+          0.214,
+          0.264,
+          0.262,
+          0.288
+        ],
+        "frac_tau_undefined": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tau_applicable": true,
+        "pair_agreement_prob": {
+          "success_collision>speed_only": [
+            0.264,
+            0.508,
+            0.806,
+            0.45,
+            0.29,
+            0.61,
+            0.752,
+            0.786,
+            0.832,
+            0.89
+          ]
+        },
+        "frac_resolved_pairs_ok": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "p_top_set": [
+          0.758,
+          0.86,
+          0.976,
+          0.944,
+          0.794,
+          0.95,
+          0.94,
+          0.986,
+          0.988,
+          0.986
+        ],
+        "agree_nominal": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "agree_bonferroni": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "agree": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      "looks": {
+        "n_eligible_looks": 6,
+        "correction": "none",
+        "prob_nominal": 0.8,
+        "prob_bonferroni": 0.9666666666666667,
+        "note": "The first budget that passes is selected among several looks, so nominal probabilities are optimistic for the selected budget (winner's curse). Persistence over later budgets is required, and the Bonferroni-tightened result is reported alongside; neither is an exact family-wise guarantee."
+      },
+      "first_agreeing_step": null,
+      "stable_step": null,
+      "stable_step_nominal": null,
+      "stable_step_bonferroni": null,
+      "reference_reproducibility": {
+        "tau_median": 0.4000816826662603,
+        "frac_tau_ok": 0.288,
+        "frac_resolved_pairs_ok": 1.0,
+        "reproducible": false,
+        "meaning": "agreement between an n_exp_seeds experiment evaluated AT the reference budget and the reference ranking from disjoint seeds: the ceiling any smaller budget can reach"
+      },
+      "undefined_tau_summary": {
+        "ok": 5000
+      }
+    },
+    "behavior": {
+      "convergence": {
+        "cautious_social": {
+          "n_seeds": 8,
+          "steps": [
+            2048,
+            4096,
+            8192,
+            16384,
+            32768,
+            65536,
+            100352,
+            150528,
+            200704
+          ],
+          "metrics": {
+            "action_marginal_js": {
+              "mean": [
+                0.13143601414870415,
+                0.1379593538495878,
+                0.14993132403379844,
+                0.15793623889765518,
+                0.16125358286873454,
+                0.1870590394766662,
+                0.18155000710437236,
+                0.169072048539273,
+                0.14120009459965835
+              ],
+              "ci": [
+                [
+                  0.12030201776272495,
+                  0.14254624583528536
+                ],
+                [
+                  0.12616824321889772,
+                  0.15095414403952906
+                ],
+                [
+                  0.13657418056560933,
+                  0.16238975667334193
+                ],
+                [
+                  0.15095685444460505,
+                  0.16718413991261336
+                ],
+                [
+                  0.15125081385836547,
+                  0.17283543473989912
+                ],
+                [
+                  0.16303325351365658,
+                  0.2090834809720504
+                ],
+                [
+                  0.16658327604778195,
+                  0.1972078813978812
+                ],
+                [
+                  0.14558351199781203,
+                  0.19077648000627873
+                ],
+                [
+                  0.11878912350648668,
+                  0.1591480555228085
+                ]
+              ],
+              "threshold": 0.21410910124169055,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.21410910124169055,
+              "flags": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "first_below": 2048,
+              "stable_step": 2048,
+              "ci_note": null
+            },
+            "feature_energy": {
+              "mean": [
+                1.7174503867987576,
+                1.5278261477337303,
+                1.3954016696829599,
+                1.0551035467050427,
+                0.9328724596234478,
+                1.146080528744058,
+                1.2792345286971556,
+                0.8755305703612007,
+                0.73637899005899
+              ],
+              "ci": [
+                [
+                  1.2356539550474925,
+                  2.3369991008893405
+                ],
+                [
+                  1.0970113058986537,
+                  2.119611888412399
+                ],
+                [
+                  0.9069987285113265,
+                  2.121092937821431
+                ],
+                [
+                  0.5336862149839274,
+                  2.0444811378502323
+                ],
+                [
+                  0.4266353007417266,
+                  1.7696630472079782
+                ],
+                [
+                  0.3165175455924043,
+                  2.474266083122397
+                ],
+                [
+                  0.4763130289117602,
+                  2.5713302764389847
+                ],
+                [
+                  0.2706035754790955,
+                  1.850441733322538
+                ],
+                [
+                  0.1923002960040026,
+                  1.6959936906691455
+                ]
+              ],
+              "threshold": 1.216823009866909,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 1.216823009866909,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "first_below": null,
+              "stable_step": null,
+              "ci_note": null
+            },
+            "task_gap": {
+              "mean": [
+                0.15416666666666667,
+                0.125,
+                0.09583333333333334,
+                0.0125,
+                0.04166666666666667,
+                0.04583333333333334,
+                0.020833333333333336,
+                0.025,
+                0.025
+              ],
+              "ci": [
+                [
+                  0.1125,
+                  0.19583333333333336
+                ],
+                [
+                  0.10416666666666667,
+                  0.14166666666666666
+                ],
+                [
+                  0.05416666666666667,
+                  0.12916666666666665
+                ],
+                [
+                  0.004166666666666667,
+                  0.025
+                ],
+                [
+                  0.020833333333333332,
+                  0.0625
+                ],
+                [
+                  0.025,
+                  0.07500000000000001
+                ],
+                [
+                  0.008333333333333333,
+                  0.029166666666666667
+                ],
+                [
+                  0.008333333333333333,
+                  0.04166666666666667
+                ],
+                [
+                  0.008333333333333333,
+                  0.04166666666666667
+                ]
+              ],
+              "threshold": 0.027380952380952384,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.027380952380952384,
+              "flags": [
+                false,
+                false,
+                false,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "first_below": 16384,
+              "stable_step": null,
+              "ci_note": null
+            }
+          },
+          "stabilization": {
+            "action_marginal_js": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.0,
+                0.0019542298302565736,
+                0.0135010645854362,
+                0.025931217623559027,
+                0.05819808582872257,
+                0.047750547119682046,
+                0.07911206835271839,
+                0.08027870993076333
+              ]
+            },
+            "feature_energy": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.12477688122680092,
+                0.14410409171012908,
+                0.3855189918317631,
+                0.2544789908475185,
+                0.6144334927658596,
+                0.32819249026507163,
+                0.5089030477473468,
+                0.2374394273975906
+              ]
+            },
+            "task_gap": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.0625,
+                0.0625,
+                0.09166666666666667,
+                0.037500000000000006,
+                0.04583333333333334,
+                0.03333333333333333,
+                0.020833333333333336,
+                0.025
+              ]
+            }
+          },
+          "unavailable_metrics": [
+            "probe_js"
+          ],
+          "status": "not_converged_within_max_budget",
+          "stable_step": null
+        },
+        "goal_shaping": {
+          "n_seeds": 8,
+          "steps": [
+            2048,
+            4096,
+            8192,
+            16384,
+            32768,
+            65536,
+            100352,
+            150528,
+            200704
+          ],
+          "metrics": {
+            "action_marginal_js": {
+              "mean": [
+                0.22695679453876422,
+                0.19376147511818548,
+                0.1644128370084474,
+                0.14321834273374381,
+                0.14732521324670245,
+                0.14593919480876866,
+                0.14624833552443744,
+                0.14067394312398834,
+                0.10441388245065229
+              ],
+              "ci": [
+                [
+                  0.20869163001934848,
+                  0.24469312722572611
+                ],
+                [
+                  0.1754656354271508,
+                  0.2096786409846647
+                ],
+                [
+                  0.14920297504311325,
+                  0.1774908408179271
+                ],
+                [
+                  0.12931817848047103,
+                  0.1554480016641523
+                ],
+                [
+                  0.12670711846126034,
+                  0.16999880158930183
+                ],
+                [
+                  0.12584889025244156,
+                  0.1657320632572282
+                ],
+                [
+                  0.11705917339876318,
+                  0.17739797581814426
+                ],
+                [
+                  0.12277008840639404,
+                  0.1564312971533205
+                ],
+                [
+                  0.09649217255505836,
+                  0.11155414253112757
+                ]
+              ],
+              "threshold": 0.17904893229362182,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.17904893229362182,
+              "flags": [
+                false,
+                false,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "first_below": 8192,
+              "stable_step": 8192,
+              "ci_note": null
+            },
+            "feature_energy": {
+              "mean": [
+                6.271857502985758,
+                5.271463354344199,
+                4.458856297515882,
+                2.0940085890828057,
+                0.8491512873442856,
+                0.5452864070567329,
+                0.4793553318405961,
+                0.43893525529483113,
+                0.3535517065641991
+              ],
+              "ci": [
+                [
+                  5.813909535895864,
+                  6.716713074314769
+                ],
+                [
+                  4.911562886932365,
+                  5.623917227688081
+                ],
+                [
+                  4.1481949593062035,
+                  4.754623991267631
+                ],
+                [
+                  1.425119611891165,
+                  2.790640498397543
+                ],
+                [
+                  0.6210077213062858,
+                  1.1561020782477383
+                ],
+                [
+                  0.3769409538899866,
+                  0.7565152510271875
+                ],
+                [
+                  0.3555473759000213,
+                  0.6258380623670052
+                ],
+                [
+                  0.26037280481786934,
+                  0.6496049114983562
+                ],
+                [
+                  0.2834000848766801,
+                  0.4322518336362979
+                ]
+              ],
+              "threshold": 0.41916397853711534,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.41916397853711534,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "first_below": null,
+              "stable_step": null,
+              "ci_note": null
+            },
+            "task_gap": {
+              "mean": [
+                0.7416666666666667,
+                0.7416666666666667,
+                0.7333333333333334,
+                0.48749999999999993,
+                0.18333333333333335,
+                0.09583333333333337,
+                0.10416666666666671,
+                0.06250000000000003,
+                0.10833333333333336
+              ],
+              "ci": [
+                [
+                  0.7083333333333333,
+                  0.775
+                ],
+                [
+                  0.7083333333333333,
+                  0.7791666666666667
+                ],
+                [
+                  0.7041666666666666,
+                  0.7625
+                ],
+                [
+                  0.4125,
+                  0.575
+                ],
+                [
+                  0.12083333333333332,
+                  0.24583333333333335
+                ],
+                [
+                  0.05000000000000003,
+                  0.1375
+                ],
+                [
+                  0.06666666666666671,
+                  0.13750000000000007
+                ],
+                [
+                  0.041666666666666685,
+                  0.08750000000000004
+                ],
+                [
+                  0.0791666666666667,
+                  0.13552083333333328
+                ]
+              ],
+              "threshold": 0.07142857142857148,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.07142857142857148,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "first_below": null,
+              "stable_step": null,
+              "ci_note": null
+            }
+          },
+          "stabilization": {
+            "action_marginal_js": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.001627938293239756,
+                0.009123539042779972,
+                0.02841409091952468,
+                0.043264256886453155,
+                0.07027045692259253,
+                0.07349924142507458,
+                0.08366870170669505,
+                0.07898202079860041
+              ]
+            },
+            "feature_energy": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.4559079674674363,
+                0.5924718694358716,
+                1.0727532343263322,
+                0.9575943087428544,
+                0.4503623983124556,
+                0.3937484972173338,
+                0.46774424308709056,
+                0.30495568735572803
+              ]
+            },
+            "task_gap": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.07916666666666668,
+                0.10833333333333331,
+                0.24583333333333332,
+                0.30416666666666664,
+                0.12499999999999997,
+                0.08750000000000001,
+                0.11666666666666667,
+                0.125
+              ]
+            }
+          },
+          "unavailable_metrics": [
+            "probe_js"
+          ],
+          "status": "not_converged_within_max_budget",
+          "stable_step": null
+        },
+        "progress_social": {
+          "n_seeds": 8,
+          "steps": [
+            2048,
+            4096,
+            8192,
+            16384,
+            32768,
+            65536,
+            100352,
+            150528,
+            200704
+          ],
+          "metrics": {
+            "action_marginal_js": {
+              "mean": [
+                0.22098381258551028,
+                0.20055612684661506,
+                0.16966492774617503,
+                0.15053107564987905,
+                0.16066739166204203,
+                0.17774580418457692,
+                0.16380937949341495,
+                0.11812587064176604,
+                0.1061083977581454
+              ],
+              "ci": [
+                [
+                  0.20555393764162377,
+                  0.23886038174848592
+                ],
+                [
+                  0.18468956803874828,
+                  0.21845164512496235
+                ],
+                [
+                  0.1530420531368417,
+                  0.18819821315771565
+                ],
+                [
+                  0.12561533985712414,
+                  0.17391407017919422
+                ],
+                [
+                  0.13826643463549332,
+                  0.18547269166803898
+                ],
+                [
+                  0.15450312815474007,
+                  0.20347027720896105
+                ],
+                [
+                  0.1440175529787683,
+                  0.1823098838702087
+                ],
+                [
+                  0.09948592946720118,
+                  0.1340907475522258
+                ],
+                [
+                  0.08812630832730835,
+                  0.12566761828386855
+                ]
+              ],
+              "threshold": 0.16916991340139664,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.16916991340139664,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+              ],
+              "first_below": 150528,
+              "stable_step": null,
+              "ci_note": null
+            },
+            "feature_energy": {
+              "mean": [
+                6.117904199811038,
+                5.2451096766429295,
+                4.494794888047652,
+                2.127827972480187,
+                0.6610241305484462,
+                0.6675483978518384,
+                0.7255824518917926,
+                0.5207901995109352,
+                0.4924836782202297
+              ],
+              "ci": [
+                [
+                  5.850523289536426,
+                  6.419677048620048
+                ],
+                [
+                  4.974558720980715,
+                  5.514387695091298
+                ],
+                [
+                  4.2677477450999035,
+                  4.762229934886331
+                ],
+                [
+                  1.651131967643718,
+                  2.50540935037208
+                ],
+                [
+                  0.5463539799798862,
+                  0.7748444608760809
+                ],
+                [
+                  0.4593202893562849,
+                  0.9098712083198658
+                ],
+                [
+                  0.4447214640499479,
+                  1.064903353966035
+                ],
+                [
+                  0.3267945449575238,
+                  0.7846712841555141
+                ],
+                [
+                  0.30456554641712985,
+                  0.7517734199044389
+                ]
+              ],
+              "threshold": 0.5443450914305492,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.5443450914305492,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "first_below": null,
+              "stable_step": null,
+              "ci_note": null
+            },
+            "task_gap": {
+              "mean": [
+                0.75,
+                0.75,
+                0.75,
+                0.4958333333333333,
+                0.13750000000000004,
+                0.1166666666666667,
+                0.14166666666666666,
+                0.08750000000000002,
+                0.07499999999999998
+              ],
+              "ci": [
+                [
+                  0.7166666666666666,
+                  0.7833333333333333
+                ],
+                [
+                  0.7166666666666666,
+                  0.7875
+                ],
+                [
+                  0.7166666666666666,
+                  0.7833333333333334
+                ],
+                [
+                  0.4103125,
+                  0.5666666666666667
+                ],
+                [
+                  0.10000000000000002,
+                  0.17500000000000004
+                ],
+                [
+                  0.07083333333333336,
+                  0.17302083333333326
+                ],
+                [
+                  0.09583333333333334,
+                  0.18750000000000006
+                ],
+                [
+                  0.0541666666666667,
+                  0.1166666666666667
+                ],
+                [
+                  0.04583333333333334,
+                  0.10416666666666664
+                ]
+              ],
+              "threshold": 0.07619047619047623,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.07619047619047623,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "first_below": null,
+              "stable_step": null,
+              "ci_note": null
+            }
+          },
+          "stabilization": {
+            "action_marginal_js": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.0007662173828376065,
+                0.00882882130272465,
+                0.02021269157216412,
+                0.039265479602428835,
+                0.07456240023863515,
+                0.07254185278175874,
+                0.08429357044491628,
+                0.0749706442290575
+              ]
+            },
+            "feature_energy": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.4133808635765751,
+                0.5457653851121265,
+                0.9699928683644587,
+                1.3189872119864212,
+                0.3477714384672671,
+                0.4161694034329203,
+                0.3366447927620811,
+                0.43458038474172916
+              ]
+            },
+            "task_gap": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.07916666666666666,
+                0.07916666666666666,
+                0.25416666666666665,
+                0.3666666666666667,
+                0.08750000000000002,
+                0.14583333333333337,
+                0.11249999999999999,
+                0.09166666666666669
+              ]
+            }
+          },
+          "unavailable_metrics": [
+            "probe_js"
+          ],
+          "status": "not_converged_within_max_budget",
+          "stable_step": null
+        },
+        "reckless_fast": {
+          "n_seeds": 8,
+          "steps": [
+            2048,
+            4096,
+            8192,
+            16384,
+            32768,
+            65536,
+            100352,
+            150528,
+            200704
+          ],
+          "metrics": {
+            "action_marginal_js": {
+              "mean": [
+                0.2153885899344353,
+                0.1972048999618583,
+                0.18039128889824374,
+                0.17302488406227676,
+                0.17223919687206962,
+                0.13177879588517144,
+                0.12091236837280946,
+                0.10377924826935522,
+                0.07585988026316959
+              ],
+              "ci": [
+                [
+                  0.19881721775207922,
+                  0.23539658963061827
+                ],
+                [
+                  0.17732908703408698,
+                  0.21813176856587047
+                ],
+                [
+                  0.16327730482655017,
+                  0.19910741162930803
+                ],
+                [
+                  0.16156571696652913,
+                  0.18649666662556738
+                ],
+                [
+                  0.1519294455017227,
+                  0.19436744274716009
+                ],
+                [
+                  0.11037612600701557,
+                  0.15308129767608264
+                ],
+                [
+                  0.1076741539893969,
+                  0.13656056025577937
+                ],
+                [
+                  0.09040978367862228,
+                  0.11907547686977127
+                ],
+                [
+                  0.06485657855544322,
+                  0.08817448580467066
+                ]
+              ],
+              "threshold": 0.12010150819140217,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.12010150819140217,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+              ],
+              "first_below": 150528,
+              "stable_step": null,
+              "ci_note": null
+            },
+            "feature_energy": {
+              "mean": [
+                3.435387047000874,
+                2.719482460112878,
+                2.1509461573081925,
+                1.658425979453276,
+                1.3327164220719956,
+                0.7332578397596752,
+                0.38969479042115607,
+                0.3681183612403788,
+                0.2429824893317613
+              ],
+              "ci": [
+                [
+                  3.2191574284501936,
+                  3.647927091622586
+                ],
+                [
+                  2.50169689269541,
+                  2.9419280571585293
+                ],
+                [
+                  1.9948432111709202,
+                  2.2905305538887135
+                ],
+                [
+                  1.4842684024907766,
+                  1.896661225965079
+                ],
+                [
+                  1.0925626517788998,
+                  1.6415983291691618
+                ],
+                [
+                  0.5656910430964248,
+                  0.9155208619885002
+                ],
+                [
+                  0.2967724438106968,
+                  0.500876257166838
+                ],
+                [
+                  0.28186798452174966,
+                  0.45227751495356133
+                ],
+                [
+                  0.18736417336147745,
+                  0.30381240331323256
+                ]
+              ],
+              "threshold": 0.34444609237467916,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.34444609237467916,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true
+              ],
+              "first_below": 200704,
+              "stable_step": null,
+              "ci_note": null
+            },
+            "task_gap": {
+              "mean": [
+                0.10416666666666667,
+                0.0625,
+                0.06666666666666665,
+                0.11249999999999999,
+                0.09166666666666666,
+                0.09166666666666665,
+                0.09166666666666666,
+                0.09999999999999998,
+                0.07499999999999998
+              ],
+              "ci": [
+                [
+                  0.0625,
+                  0.1375
+                ],
+                [
+                  0.041666666666666664,
+                  0.08333333333333334
+                ],
+                [
+                  0.033333333333333326,
+                  0.09385416666666657
+                ],
+                [
+                  0.05833333333333332,
+                  0.16249999999999998
+                ],
+                [
+                  0.054166666666666655,
+                  0.12916666666666665
+                ],
+                [
+                  0.03947916666666671,
+                  0.14999999999999997
+                ],
+                [
+                  0.04583333333333334,
+                  0.15
+                ],
+                [
+                  0.054166666666666655,
+                  0.14166666666666666
+                ],
+                [
+                  0.03749999999999999,
+                  0.11666666666666667
+                ]
+              ],
+              "threshold": 0.0833333333333333,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.0833333333333333,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "first_below": null,
+              "stable_step": null,
+              "ci_note": null
+            }
+          },
+          "stabilization": {
+            "action_marginal_js": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.0008378518843528621,
+                0.005664752861713215,
+                0.014069292692346174,
+                0.028195353919779217,
+                0.05651449839486394,
+                0.05053620383118006,
+                0.06457014438064318,
+                0.05584894001254245
+              ]
+            },
+            "feature_energy": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.4016144713055395,
+                0.34054320709784663,
+                0.28882135362602834,
+                0.22444976616023582,
+                0.48072734349503266,
+                0.3325130538058693,
+                0.2533998812621725,
+                0.248132464495676
+              ]
+            },
+            "task_gap": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.08750000000000001,
+                0.041666666666666664,
+                0.09583333333333333,
+                0.06666666666666665,
+                0.08333333333333333,
+                0.09583333333333333,
+                0.10833333333333332,
+                0.08333333333333331
+              ]
+            }
+          },
+          "unavailable_metrics": [
+            "probe_js"
+          ],
+          "status": "not_converged_within_max_budget",
+          "stable_step": null
+        },
+        "speed_only": {
+          "n_seeds": 8,
+          "steps": [
+            2048,
+            4096,
+            8192,
+            16384,
+            32768,
+            65536,
+            100352,
+            150528,
+            200704
+          ],
+          "metrics": {
+            "action_marginal_js": {
+              "mean": [
+                0.5772053378823672,
+                0.5384648966743494,
+                0.45190422476123115,
+                0.338909601429359,
+                0.19638779576331583,
+                0.18410626547697473,
+                0.17677689034876298,
+                0.13259156983229411,
+                0.10071141126749854
+              ],
+              "ci": [
+                [
+                  0.555870999253615,
+                  0.5938368204634595
+                ],
+                [
+                  0.5156238106848565,
+                  0.5573377764381934
+                ],
+                [
+                  0.42647708565249326,
+                  0.48108720479946615
+                ],
+                [
+                  0.3175161998927631,
+                  0.36593016122904876
+                ],
+                [
+                  0.17041087900064866,
+                  0.22277674833727576
+                ],
+                [
+                  0.15159726376677127,
+                  0.21816327881198747
+                ],
+                [
+                  0.14963899973382674,
+                  0.2012647833254575
+                ],
+                [
+                  0.10276454178078359,
+                  0.15842753847763022
+                ],
+                [
+                  0.07355880842362389,
+                  0.1283300648970905
+                ]
+              ],
+              "threshold": 0.2770901824936846,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.2770901824936846,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "first_below": 32768,
+              "stable_step": 32768,
+              "ci_note": null
+            },
+            "feature_energy": {
+              "mean": [
+                6.790971668507227,
+                6.109325641626038,
+                5.088443802504774,
+                3.5035166827738786,
+                2.298860372177352,
+                1.3599101669437204,
+                0.663580576077728,
+                0.41740307749824207,
+                0.2057849915577954
+              ],
+              "ci": [
+                [
+                  6.359609104185977,
+                  7.331667262029208
+                ],
+                [
+                  5.6417628161719495,
+                  6.736514907640972
+                ],
+                [
+                  4.641032837894856,
+                  5.760167244717537
+                ],
+                [
+                  3.0091009483740367,
+                  4.0445865266890575
+                ],
+                [
+                  1.8509899893684283,
+                  2.809717804071514
+                ],
+                [
+                  0.8938535391772905,
+                  1.8045367689156642
+                ],
+                [
+                  0.3936069555810084,
+                  1.0119708777514467
+                ],
+                [
+                  0.18468659411389285,
+                  0.7824983936832751
+                ],
+                [
+                  0.15616499226163905,
+                  0.2541724783315537
+                ]
+              ],
+              "threshold": 0.8294688195780447,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.8294688195780447,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+              ],
+              "first_below": 150528,
+              "stable_step": null,
+              "ci_note": null
+            },
+            "task_gap": {
+              "mean": [
+                0.08750000000000001,
+                0.125,
+                0.13333333333333333,
+                0.058333333333333334,
+                0.04166666666666667,
+                0.04166666666666667,
+                0.05,
+                0.04583333333333334,
+                0.03333333333333334
+              ],
+              "ci": [
+                [
+                  0.05,
+                  0.12083333333333335
+                ],
+                [
+                  0.09583333333333335,
+                  0.15000000000000002
+                ],
+                [
+                  0.1,
+                  0.16666666666666669
+                ],
+                [
+                  0.025,
+                  0.09583333333333334
+                ],
+                [
+                  0.016666666666666666,
+                  0.075
+                ],
+                [
+                  0.020833333333333336,
+                  0.05833333333333334
+                ],
+                [
+                  0.020833333333333332,
+                  0.0875
+                ],
+                [
+                  0.026979166666666714,
+                  0.06666666666666668
+                ],
+                [
+                  0.016666666666666663,
+                  0.05
+                ]
+              ],
+              "threshold": 0.054761904761904776,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.054761904761904776,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true
+              ],
+              "first_below": 200704,
+              "stable_step": null,
+              "ci_note": null
+            }
+          },
+          "stabilization": {
+            "action_marginal_js": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.0005589409113232495,
+                0.016139669179199068,
+                0.04564917136256119,
+                0.12286170057217836,
+                0.13628848330785784,
+                0.1225075498581982,
+                0.09242121428437935,
+                0.06987481016404852
+              ]
+            },
+            "feature_energy": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.1991270352193959,
+                0.44471681402069557,
+                1.1062034618375916,
+                2.7994252228593473,
+                1.1912677387377903,
+                1.016446897093925,
+                0.5618690300824892,
+                0.35785786374264333
+              ]
+            },
+            "task_gap": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.04583333333333334,
+                0.041666666666666664,
+                0.125,
+                0.05,
+                0.04166666666666667,
+                0.04166666666666667,
+                0.04583333333333334,
+                0.037500000000000006
+              ]
+            }
+          },
+          "unavailable_metrics": [
+            "probe_js"
+          ],
+          "status": "not_converged_within_max_budget",
+          "stable_step": null
+        },
+        "standard": {
+          "n_seeds": 8,
+          "steps": [
+            2048,
+            4096,
+            8192,
+            16384,
+            32768,
+            65536,
+            100352,
+            150528,
+            200704
+          ],
+          "metrics": {
+            "action_marginal_js": {
+              "mean": [
+                0.14017502230679424,
+                0.14412067807869958,
+                0.14790513566096627,
+                0.1579802820285628,
+                0.15575796159860603,
+                0.15303659933049935,
+                0.15742637113203847,
+                0.1348068789614706,
+                0.1354409932348049
+              ],
+              "ci": [
+                [
+                  0.11360003517158475,
+                  0.17534051977393278
+                ],
+                [
+                  0.11963090053150273,
+                  0.17810866934534594
+                ],
+                [
+                  0.1225075364927838,
+                  0.18059279056293948
+                ],
+                [
+                  0.1288227482429685,
+                  0.19256667987184772
+                ],
+                [
+                  0.12669547355396535,
+                  0.18908566456023926
+                ],
+                [
+                  0.13107342304734615,
+                  0.17929786123994995
+                ],
+                [
+                  0.13988086744257247,
+                  0.17943634383113907
+                ],
+                [
+                  0.11687141888551399,
+                  0.15911219974839222
+                ],
+                [
+                  0.11606661276221003,
+                  0.15764659261171604
+                ]
+              ],
+              "threshold": 0.21538813409692464,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.21538813409692464,
+              "flags": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "first_below": 2048,
+              "stable_step": 2048,
+              "ci_note": null
+            },
+            "feature_energy": {
+              "mean": [
+                2.0645485657958837,
+                2.020222115064128,
+                1.8806846173586071,
+                1.5584076842416403,
+                1.2670185207560616,
+                0.8520434041542738,
+                0.8855540664254106,
+                0.5237262411427408,
+                0.7370936055564342
+              ],
+              "ci": [
+                [
+                  1.3716625689650639,
+                  3.017898168835914
+                ],
+                [
+                  1.408869838175024,
+                  2.9458977147955516
+                ],
+                [
+                  1.2689402905919998,
+                  2.6467144584573674
+                ],
+                [
+                  1.010325535604011,
+                  2.388208567772408
+                ],
+                [
+                  0.7736163396906772,
+                  2.012134120879254
+                ],
+                [
+                  0.37732462494657154,
+                  1.5556778940923022
+                ],
+                [
+                  0.4403593092579895,
+                  1.553404553647354
+                ],
+                [
+                  0.207096150971835,
+                  0.9625346091938932
+                ],
+                [
+                  0.20819083401387264,
+                  1.490775558283081
+                ]
+              ],
+              "threshold": 1.0042492638624587,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 1.0042492638624587,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                false
+              ],
+              "first_below": 150528,
+              "stable_step": null,
+              "ci_note": null
+            },
+            "task_gap": {
+              "mean": [
+                0.1791666666666667,
+                0.17916666666666667,
+                0.1375,
+                0.10416666666666666,
+                0.09166666666666667,
+                0.025,
+                0.025,
+                0.016666666666666666,
+                0.016666666666666666
+              ],
+              "ci": [
+                [
+                  0.14583333333333334,
+                  0.21250000000000002
+                ],
+                [
+                  0.15000000000000002,
+                  0.20416666666666666
+                ],
+                [
+                  0.10416666666666667,
+                  0.17083333333333334
+                ],
+                [
+                  0.058333333333333334,
+                  0.15833333333333335
+                ],
+                [
+                  0.05,
+                  0.13135416666666658
+                ],
+                [
+                  0.008333333333333333,
+                  0.05
+                ],
+                [
+                  0.004166666666666667,
+                  0.05
+                ],
+                [
+                  0.004166666666666667,
+                  0.029166666666666667
+                ],
+                [
+                  0.0,
+                  0.03333333333333333
+                ]
+              ],
+              "threshold": 0.014285714285714287,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.014285714285714287,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "first_below": null,
+              "stable_step": null,
+              "ci_note": null
+            }
+          },
+          "stabilization": {
+            "action_marginal_js": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.0,
+                0.0009630699776568522,
+                0.008151854391147502,
+                0.020742148638936433,
+                0.05138089926267028,
+                0.05007621653036492,
+                0.07668594919897415,
+                0.07427356991709386
+              ]
+            },
+            "feature_energy": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.0935315904696476,
+                0.13051120419222928,
+                0.28657558889371015,
+                0.25169252146717924,
+                0.6842503686158699,
+                0.32256194078870337,
+                0.4571241287187909,
+                0.40181759104149506
+              ]
+            },
+            "task_gap": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.04166666666666667,
+                0.05,
+                0.058333333333333334,
+                0.04583333333333333,
+                0.06666666666666667,
+                0.03333333333333333,
+                0.025,
+                0.025
+              ]
+            }
+          },
+          "unavailable_metrics": [
+            "probe_js"
+          ],
+          "status": "not_converged_within_max_budget",
+          "stable_step": null
+        },
+        "success_collision": {
+          "n_seeds": 8,
+          "steps": [
+            2048,
+            4096,
+            8192,
+            16384,
+            32768,
+            65536,
+            100352,
+            150528,
+            200704
+          ],
+          "metrics": {
+            "action_marginal_js": {
+              "mean": [
+                0.12394969670565574,
+                0.12911757395392884,
+                0.13495129309046985,
+                0.13730749894145836,
+                0.1563081318335704,
+                0.15615979640491787,
+                0.15874536510114146,
+                0.1433247632766329,
+                0.14574092951165793
+              ],
+              "ci": [
+                [
+                  0.10060362043965858,
+                  0.14757626772225255
+                ],
+                [
+                  0.10763623258947505,
+                  0.15037490631702363
+                ],
+                [
+                  0.1145925452322978,
+                  0.15709849120573605
+                ],
+                [
+                  0.11744903837359084,
+                  0.15831200515472255
+                ],
+                [
+                  0.13238845268323093,
+                  0.17994658565981467
+                ],
+                [
+                  0.13338180108323083,
+                  0.17595257903932227
+                ],
+                [
+                  0.13258963907953508,
+                  0.18197089458310828
+                ],
+                [
+                  0.12889362110318567,
+                  0.15888968819637547
+                ],
+                [
+                  0.11805318166828153,
+                  0.17456315847984633
+                ]
+              ],
+              "threshold": 0.21853968144390776,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.21853968144390776,
+              "flags": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "first_below": 2048,
+              "stable_step": 2048,
+              "ci_note": null
+            },
+            "feature_energy": {
+              "mean": [
+                1.6444030829852685,
+                1.6036499727050835,
+                1.4418519489161237,
+                1.1315472810944587,
+                1.0535175045966034,
+                1.0152951898069884,
+                0.7431428252799089,
+                0.45571833370865256,
+                0.5511631623168056
+              ],
+              "ci": [
+                [
+                  1.226994665784735,
+                  2.091425494455883
+                ],
+                [
+                  1.1943206266724162,
+                  2.101522168301656
+                ],
+                [
+                  1.0596911776046714,
+                  1.8686903670160584
+                ],
+                [
+                  0.7581335946123482,
+                  1.6495349984586811
+                ],
+                [
+                  0.5851820677586638,
+                  1.7144523373424982
+                ],
+                [
+                  0.5679760673498775,
+                  1.6264618417138932
+                ],
+                [
+                  0.4296560240531523,
+                  1.0250879506877337
+                ],
+                [
+                  0.24451226030749448,
+                  0.6652456900658642
+                ],
+                [
+                  0.28746260911653726,
+                  0.796885220492535
+                ]
+              ],
+              "threshold": 1.5641648945498958,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 1.5641648945498958,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+              ],
+              "first_below": 100352,
+              "stable_step": 100352,
+              "ci_note": null
+            },
+            "task_gap": {
+              "mean": [
+                0.22083333333333333,
+                0.20416666666666666,
+                0.16249999999999998,
+                0.10416666666666669,
+                0.09166666666666667,
+                0.09583333333333333,
+                0.041666666666666664,
+                0.05,
+                0.02916666666666666
+              ],
+              "ci": [
+                [
+                  0.15000000000000002,
+                  0.29583333333333334
+                ],
+                [
+                  0.15000000000000002,
+                  0.2791666666666667
+                ],
+                [
+                  0.10416666666666667,
+                  0.24166666666666664
+                ],
+                [
+                  0.024999999999999998,
+                  0.20416666666666666
+                ],
+                [
+                  0.029166666666666667,
+                  0.2
+                ],
+                [
+                  0.0375,
+                  0.1875
+                ],
+                [
+                  0.004166666666666667,
+                  0.10416666666666667
+                ],
+                [
+                  0.0125,
+                  0.09802083333333325
+                ],
+                [
+                  0.0,
+                  0.07083333333333332
+                ]
+              ],
+              "threshold": 0.11547619047619048,
+              "threshold_basis": "floor_relative: factor x mean distance between references of different seeds",
+              "reference_noise_floor": 0.11547619047619048,
+              "flags": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+              ],
+              "first_below": 100352,
+              "stable_step": 100352,
+              "ci_note": null
+            }
+          },
+          "stabilization": {
+            "action_marginal_js": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.0,
+                0.0005263773774405879,
+                0.010773243844159723,
+                0.024836777003242435,
+                0.04623142636173551,
+                0.057132263270475936,
+                0.07780060922929569,
+                0.07470810418940213
+              ]
+            },
+            "feature_energy": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.12711477136715943,
+                0.12752251144044258,
+                0.2666836357945937,
+                0.352653215169366,
+                0.24353089931370384,
+                0.33777893316705554,
+                0.409761970928382,
+                0.37876927157645796
+              ]
+            },
+            "task_gap": {
+              "from": [
+                2048,
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528
+              ],
+              "to": [
+                4096,
+                8192,
+                16384,
+                32768,
+                65536,
+                100352,
+                150528,
+                200704
+              ],
+              "mean_change": [
+                0.07500000000000001,
+                0.05,
+                0.07083333333333333,
+                0.06666666666666667,
+                0.04583333333333334,
+                0.05416666666666667,
+                0.05,
+                0.0625
+              ]
+            }
+          },
+          "unavailable_metrics": [
+            "probe_js"
+          ],
+          "status": "converged",
+          "stable_step": 100352
+        }
+      }
+    },
+    "decision": {
+      "status": "reference_uncertain",
+      "minimum_reliable_budget": null,
+      "recommended_budget": null,
+      "reason": "reference policy stability not established -> success_collision: reference seeds disagree on success: between-seed SD 0.153 > 0.15",
+      "provisional_budget_if_reference_were_trusted": null
+    },
+    "questions": {
+      "1_behaviour_stabilised": {
+        "cautious_social": {
+          "metric": "action_marginal_js",
+          "last_consecutive_change": 0.08027870993076333,
+          "reference_noise_floor": 0.21410910124169055,
+          "stabilized": true
+        },
+        "goal_shaping": {
+          "metric": "action_marginal_js",
+          "last_consecutive_change": 0.07898202079860041,
+          "reference_noise_floor": 0.17904893229362182,
+          "stabilized": true
+        },
+        "progress_social": {
+          "metric": "action_marginal_js",
+          "last_consecutive_change": 0.0749706442290575,
+          "reference_noise_floor": 0.16916991340139664,
+          "stabilized": true
+        },
+        "reckless_fast": {
+          "metric": "action_marginal_js",
+          "last_consecutive_change": 0.05584894001254245,
+          "reference_noise_floor": 0.12010150819140217,
+          "stabilized": true
+        },
+        "speed_only": {
+          "metric": "action_marginal_js",
+          "last_consecutive_change": 0.06987481016404852,
+          "reference_noise_floor": 0.2770901824936846,
+          "stabilized": true
+        },
+        "standard": {
+          "metric": "action_marginal_js",
+          "last_consecutive_change": 0.07427356991709386,
+          "reference_noise_floor": 0.21538813409692464,
+          "stabilized": true
+        },
+        "success_collision": {
+          "metric": "action_marginal_js",
+          "last_consecutive_change": 0.07470810418940213,
+          "reference_noise_floor": 0.21853968144390776,
+          "stabilized": true
+        }
+      },
+      "2_approached_own_reference": {
+        "cautious_social": "not_converged_within_max_budget",
+        "goal_shaping": "not_converged_within_max_budget",
+        "progress_social": "not_converged_within_max_budget",
+        "reckless_fast": "not_converged_within_max_budget",
+        "speed_only": "not_converged_within_max_budget",
+        "standard": "not_converged_within_max_budget",
+        "success_collision": "converged"
+      },
+      "3_ranking_reliable": {
+        "status": "reference_uncertain",
+        "budget": null
+      },
+      "4_reference_trustworthy": {
+        "ranking_reproducible": false,
+        "uncertain_reference_rewards": [
+          "success_collision"
+        ]
+      }
+    }
+  },
+  "budget": {
+    "mode": "estimator",
+    "minimum_reliable_budget": null,
+    "recommended_stage2_steps": null,
+    "reason": "reference policy stability not established -> success_collision: reference seeds disagree on success: between-seed SD 0.153 > 0.15",
+    "status": "reference_uncertain"
+  }
+}

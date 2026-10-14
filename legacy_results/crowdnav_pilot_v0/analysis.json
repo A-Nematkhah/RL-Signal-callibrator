@@ -1,0 +1,356 @@
+{
+  "calibration": {
+    "behaviour_effect_floor": 0.3692205673681319,
+    "learning_effect_floor_z": 0.5,
+    "null_false_positive_rate": 0.05,
+    "n_features": 13,
+    "features": [
+      "act_distinct_frac",
+      "act_entropy",
+      "length",
+      "m_collision",
+      "m_discomfort_frac",
+      "m_frac_stopped",
+      "m_goal_progress_frac",
+      "m_mean_heading_cos",
+      "m_mean_speed_frac",
+      "m_min_dist_to_human",
+      "m_success",
+      "m_timeout",
+      "terminated"
+    ],
+    "n_null_tests": 20,
+    "null_quantile": 0.95
+  },
+  "rewards": {
+    "cautious_social": {
+      "n_seeds": 4,
+      "checkpoints": [
+        1024,
+        2048,
+        4096,
+        8192,
+        12032,
+        20224,
+        30208,
+        50176,
+        80128,
+        120064,
+        200192
+      ],
+      "behavioral_change_onset_step": {
+        "step": 4096,
+        "detect_prob": 1.0,
+        "ci": [
+          4096,
+          12032
+        ],
+        "transient": false
+      },
+      "stable_signal_onset_step": {
+        "step": 4096,
+        "detect_prob": 1.0,
+        "ci": [
+          4096,
+          12032
+        ]
+      },
+      "learning_onset_step": {
+        "step": null,
+        "detect_prob": 0.29,
+        "ci": [
+          8192,
+          20224
+        ]
+      },
+      "learning_stable_onset_step": {
+        "step": null,
+        "detect_prob": 0.38333333333333336,
+        "ci": [
+          8192,
+          20224
+        ]
+      },
+      "learning_change_point": {
+        "step": null,
+        "effect": 0.3166105682395821
+      },
+      "learning_direction": null,
+      "reason_if_none": [
+        "no return change beyond the null-calibrated effect floor"
+      ]
+    },
+    "goal_shaping": {
+      "n_seeds": 4,
+      "checkpoints": [
+        1024,
+        2048,
+        4096,
+        8192,
+        12032,
+        20224,
+        30208,
+        50176,
+        80128,
+        120064,
+        200192
+      ],
+      "behavioral_change_onset_step": {
+        "step": 2048,
+        "detect_prob": 1.0,
+        "ci": [
+          1024,
+          2048
+        ],
+        "transient": false
+      },
+      "stable_signal_onset_step": {
+        "step": 2048,
+        "detect_prob": 1.0,
+        "ci": [
+          1024,
+          2048
+        ]
+      },
+      "learning_onset_step": {
+        "step": 1024,
+        "detect_prob": 1.0,
+        "ci": [
+          1024,
+          1024
+        ]
+      },
+      "learning_stable_onset_step": {
+        "step": 1024,
+        "detect_prob": 1.0,
+        "ci": [
+          1024,
+          1024
+        ]
+      },
+      "learning_change_point": {
+        "step": 2048,
+        "effect": 3.126231079667102
+      },
+      "learning_direction": "increase",
+      "reason_if_none": []
+    },
+    "null_control": {
+      "n_seeds": 4,
+      "checkpoints": [
+        1024,
+        2048,
+        4096,
+        8192,
+        12032,
+        20224,
+        30208,
+        50176,
+        80128,
+        120064,
+        200192
+      ],
+      "behavioral_change_onset_step": {
+        "step": 4096,
+        "detect_prob": 1.0,
+        "ci": [
+          4096,
+          8192
+        ],
+        "transient": false
+      },
+      "stable_signal_onset_step": {
+        "step": 4096,
+        "detect_prob": 1.0,
+        "ci": [
+          4096,
+          8192
+        ]
+      },
+      "learning_onset_step": {
+        "step": null,
+        "detect_prob": 0.0,
+        "ci": null
+      },
+      "learning_stable_onset_step": {
+        "step": null,
+        "detect_prob": 0.0,
+        "ci": null
+      },
+      "learning_change_point": {
+        "step": null,
+        "effect": 0.0
+      },
+      "learning_direction": null,
+      "reason_if_none": [
+        "no return change beyond the null-calibrated effect floor"
+      ]
+    },
+    "reckless_fast": {
+      "n_seeds": 4,
+      "checkpoints": [
+        1024,
+        2048,
+        4096,
+        8192,
+        12032,
+        20224,
+        30208,
+        50176,
+        80128,
+        120064,
+        200192
+      ],
+      "behavioral_change_onset_step": {
+        "step": 2048,
+        "detect_prob": 1.0,
+        "ci": [
+          1024,
+          2048
+        ],
+        "transient": false
+      },
+      "stable_signal_onset_step": {
+        "step": 2048,
+        "detect_prob": 1.0,
+        "ci": [
+          1024,
+          2048
+        ]
+      },
+      "learning_onset_step": {
+        "step": 1024,
+        "detect_prob": 1.0,
+        "ci": [
+          1024,
+          1024
+        ]
+      },
+      "learning_stable_onset_step": {
+        "step": 1024,
+        "detect_prob": 1.0,
+        "ci": [
+          1024,
+          1024
+        ]
+      },
+      "learning_change_point": {
+        "step": 2048,
+        "effect": 1.316506481594965
+      },
+      "learning_direction": "increase",
+      "reason_if_none": []
+    },
+    "standard": {
+      "n_seeds": 4,
+      "checkpoints": [
+        1024,
+        2048,
+        4096,
+        8192,
+        12032,
+        20224,
+        30208,
+        50176,
+        80128,
+        120064,
+        200192
+      ],
+      "behavioral_change_onset_step": {
+        "step": 4096,
+        "detect_prob": 1.0,
+        "ci": [
+          4096,
+          8192
+        ],
+        "transient": false
+      },
+      "stable_signal_onset_step": {
+        "step": 4096,
+        "detect_prob": 1.0,
+        "ci": [
+          4096,
+          8192
+        ]
+      },
+      "learning_onset_step": {
+        "step": null,
+        "detect_prob": 0.29,
+        "ci": [
+          20224,
+          50176
+        ]
+      },
+      "learning_stable_onset_step": {
+        "step": null,
+        "detect_prob": 0.08666666666666667,
+        "ci": [
+          20224,
+          20224
+        ]
+      },
+      "learning_change_point": {
+        "step": null,
+        "effect": 0.4317657720077207
+      },
+      "learning_direction": null,
+      "reason_if_none": [
+        "no return change beyond the null-calibrated effect floor"
+      ]
+    }
+  },
+  "discrimination": {
+    "first": 120064,
+    "stable": null,
+    "pair_flagged_fraction": [
+      0.5,
+      0.6,
+      0.6,
+      0.6,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.8,
+      0.9
+    ],
+    "pair_onsets": {
+      "cautious_social|goal_shaping": 1024,
+      "cautious_social|null_control": null,
+      "cautious_social|reckless_fast": 2048,
+      "cautious_social|standard": null,
+      "goal_shaping|null_control": 1024,
+      "goal_shaping|reckless_fast": 12032,
+      "goal_shaping|standard": 1024,
+      "null_control|reckless_fast": 1024,
+      "null_control|standard": null,
+      "reckless_fast|standard": 1024
+    },
+    "never_distinguished": [
+      "cautious_social|null_control",
+      "cautious_social|standard",
+      "null_control|standard"
+    ],
+    "checkpoints": [
+      1024,
+      2048,
+      4096,
+      8192,
+      12032,
+      20224,
+      30208,
+      50176,
+      80128,
+      120064,
+      200192
+    ],
+    "power_note": "smallest attainable per-pair p ~0.0286 with 4 seeds per reward"
+  },
+  "budget": {
+    "mode": "screening",
+    "minimum_reliable_budget": null,
+    "recommended_stage2_steps": null,
+    "reason": "reward-discrimination criterion not met and persistent within the tested budget"
+  }
+}

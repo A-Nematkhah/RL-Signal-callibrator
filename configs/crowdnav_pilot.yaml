@@ -1,0 +1,109 @@
+# PILOT settings for CrowdNav (vita-epfl/CrowdNav, CrowdSim-v0). Starting values to be calibrated, not final.
+# CrowdNav location: set $CROWDNAV_PATH, or clone it to ./CrowdNav (next to pyproject.toml), or set adapter.crowdnav_path.
+# Machine-specific paths are NOT part of the compatibility hash.
+name: crowdnav_pilot_v2
+adapter:
+  name: crowdnav
+  kinematics: holonomic                  # holonomic | unicycle
+  n_speeds: 5
+  n_rotations: 16
+  obs_mode: ego                          # ego (goal-aligned obs AND actions) | raw
+  env_config:                            # easier pilot layout so that even sparse rewards can be learned in budget
+    sim: {human_num: 3}
+rewards:                                 # reward = sum_k weight_k * component_k  (see adapters/crowdnav.py)
+  # ---- candidates (quality spread on purpose: ranking needs candidates of different quality)
+  standard:          {weights: {success: 1.0, collision: -0.25, discomfort: -0.025}}   # original CrowdNav reward
+  goal_shaping:      {weights: {goal_progress: 1.0, success: 1.0, collision: -1.0}}
+  progress_social:   {weights: {goal_progress: 1.0, success: 1.0, collision: -1.0, discomfort: -0.5}}
+  success_collision: {weights: {success: 1.0, collision: -1.0}}
+  reckless_fast:     {weights: {goal_progress: 1.0, speed: 0.1, collision: -0.01}}
+  cautious_social:   {weights: {collision: -1.0, discomfort: -1.0, success: 0.5}}     # tends to freeze
+  speed_only:        {weights: {speed: 1.0}}
+  # ---- negative controls: they define the drift level a real signal has to exceed
+  null_control:      {weights: {}}                  # zero reward
+  random_control:    {weights: {noise: 0.1}}        # random reward, behaviour-independent
+algo:
+  name: ppo_sb3
+  n_envs: 8                              # more parallel scenarios per rollout (rollout = n_envs * n_steps)
+  hyperparams: {n_steps: 128, batch_size: 128, n_epochs: 10, learning_rate: 0.0003, gamma: 0.99, ent_coef: 0.01}
+eval:
+  n_episodes: 30
+  eval_seed_base: 10000
+  n_null_sets: 8                         # matched null bank: pi_0 re-evaluated 8x on the same env seeds
+  eval_rng_seed: 12345
+  deterministic: false
+schedule:
+  seeds: [0, 1, 2, 3, 4, 5, 6, 7]        # >= 8 seeds: bootstrap CIs and rank statistics need them
+  checkpoints: [2048, 4096, 8192, 16384, 32768, 65536, 100000, 150000, 200000, 300000]
+compute:
+  max_wall_seconds: null
+  workers: 6
+features:
+  exclude: [terminated, m_timeout, act_distinct_frac]   # collinear outcome indicators / length-confounded
+detection:
+  alpha: 0.05
+  q: 0.6667
+  persist_k: 2
+  persist_ratio: 2.0                     # persistence measured in steps (signal must hold up to 2x its onset)
+  n_perm: 499
+  null_quantile: 0.95
+  delta_l: 0.25
+  n_boot: 300
+  discrim_alpha: 0.05
+  discrim_n_perm: 2000
+  min_sep_ratio: 1.25
+  discrim_correction: none
+  min_seeds_ci: 6
+  control_rewards: [null_control, random_control]
+ranking:
+  reference_weights: {success: 1.0, collision: -0.25, discomfort: -0.025}   # task quality = original CrowdNav reward
+  tau_threshold: 0.6
+  prob: 0.8
+  n_boot: 400
+budget:
+  mode: estimator                        # estimator | ranking (legacy) | screening
+  safety_margin: 1.5
+# ---------------------------------------------------------------------------------------------------------------
+# Reference-based estimator (v2). These sections are NOT part of the compatibility hash: re-analysing stored results
+# with other thresholds is always allowed. All values are documented placeholders to calibrate, not universal truths.
+# Pre-registered ranking rule: Pareto dominance over (success: higher is better, collision: lower is better). Replace by
+# `rule: single` with only the success criterion to rank on success alone (collision-free-but-frozen policies then
+# no longer count as incomparable to successful ones).
+reference:                               # applied by `run` for NEW experiments
+  budget: 300000                         # snapped up to a rollout multiple; default = largest checkpoint
+  n_episodes: 100                        # larger evaluation of the reference policies (eval_set "R"), disjoint scenarios
+  eval_seed_base: 50000
+behavior_probe:                          # policy fingerprints on fixed probe states, saved at every evaluated checkpoint
+  enabled: true
+  n_states: 64
+  seed_base: 20000
+  stride: 3
+estimator:
+  rule: pareto                           # single | weighted | pareto
+  criteria:
+    - {name: success,   source: metric, key: success,   direction: higher}
+    - {name: collision, source: metric, key: collision, direction: lower}
+  n_boot: 500
+  n_exp_seeds: null                      # null -> half of the seeds act as the "experiment"; the other half is the reference
+  tau_threshold: 0.6
+  prob: 0.8
+  resolve_prob: 0.9
+  pair_prob: 0.8
+  pair_fraction: 0.9
+  top_set_prob: 0.8
+  persist_k: 2
+  persist_ratio: 2.0
+  looks_correction: none                 # none | bonferroni
+  min_reference_ratio: 3.0
+  min_seeds: 6
+  min_eval_episodes: 30
+  safety_margin: 1.5
+  uncertain_reference: block             # block | exclude_pairs | ignore_with_flag
+  ref_max_between_seed_sd: 0.15
+  ref_max_probe_js: 0.15
+  ref_trend_fraction: 0.5
+  ref_max_trend: 0.05
+  ref_behavior_blocks: false
+  behavior_metrics: [probe_js, action_marginal_js, feature_energy, task_gap]
+  behavior_threshold_mode: floor_relative
+  behavior_floor_factor: 1.0

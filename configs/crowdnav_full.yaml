@@ -1,0 +1,67 @@
+# FULL-horizon settings (1M transitions). Run only after the pilot passes the acceptance checks in README.
+# CrowdNav location: set $CROWDNAV_PATH, or clone it to ./CrowdNav (next to pyproject.toml), or set adapter.crowdnav_path.
+# Machine-specific paths are NOT part of the compatibility hash.
+name: crowdnav_full_v2
+adapter:
+  name: crowdnav
+  kinematics: holonomic                  # holonomic | unicycle
+  n_speeds: 5
+  n_rotations: 16
+  obs_mode: ego                          # ego (goal-aligned obs AND actions) | raw
+  env_config:                            # easier pilot layout so that even sparse rewards can be learned in budget
+    sim: {human_num: 3}
+rewards:                                 # reward = sum_k weight_k * component_k  (see adapters/crowdnav.py)
+  # ---- candidates (quality spread on purpose: ranking needs candidates of different quality)
+  standard:          {weights: {success: 1.0, collision: -0.25, discomfort: -0.025}}   # original CrowdNav reward
+  goal_shaping:      {weights: {goal_progress: 1.0, success: 1.0, collision: -1.0}}
+  progress_social:   {weights: {goal_progress: 1.0, success: 1.0, collision: -1.0, discomfort: -0.5}}
+  success_collision: {weights: {success: 1.0, collision: -1.0}}
+  reckless_fast:     {weights: {goal_progress: 1.0, speed: 0.1, collision: -0.01}}
+  cautious_social:   {weights: {collision: -1.0, discomfort: -1.0, success: 0.5}}     # tends to freeze
+  speed_only:        {weights: {speed: 1.0}}
+  # ---- negative controls: they define the drift level a real signal has to exceed
+  null_control:      {weights: {}}                  # zero reward
+  random_control:    {weights: {noise: 0.1}}        # random reward, behaviour-independent
+algo:
+  name: ppo_sb3
+  n_envs: 8                              # more parallel scenarios per rollout (rollout = n_envs * n_steps)
+  hyperparams: {n_steps: 128, batch_size: 128, n_epochs: 10, learning_rate: 0.0003, gamma: 0.99, ent_coef: 0.01}
+eval:
+  n_episodes: 30
+  eval_seed_base: 10000
+  n_null_sets: 8                         # matched null bank: pi_0 re-evaluated 8x on the same env seeds
+  eval_rng_seed: 12345
+  deterministic: false
+schedule:
+  seeds: [0, 1, 2, 3, 4, 5, 6, 7]        # >= 8 seeds: bootstrap CIs and rank statistics need them
+  checkpoints: [4096, 8192, 16384, 32768, 65536, 100000, 150000, 200000, 300000, 450000, 650000, 1000000]
+compute:
+  max_wall_seconds: null
+  workers: 6
+features:
+  exclude: [terminated, m_timeout, act_distinct_frac]   # collinear outcome indicators / length-confounded
+detection:
+  alpha: 0.05
+  q: 0.6667
+  persist_k: 2
+  persist_ratio: 2.0                     # persistence measured in steps (signal must hold up to 2x its onset)
+  n_perm: 499
+  null_quantile: 0.95
+  delta_l: 0.25
+  n_boot: 300
+  discrim_alpha: 0.05
+  discrim_n_perm: 2000
+  min_sep_ratio: 1.25
+  discrim_correction: none
+  min_seeds_ci: 6
+  control_rewards: [null_control, random_control]
+ranking:
+  reference_weights: {success: 1.0, collision: -0.25, discomfort: -0.025}   # task quality = original CrowdNav reward
+  tau_threshold: 0.6
+  prob: 0.8
+  n_boot: 400
+budget:
+  mode: ranking                          # ranking | screening
+  safety_margin: 1.5
+# See configs/crowdnav_pilot.yaml for the documented `reference`, `behavior_probe` and `estimator` sections; copy them
+# here (they are not part of the compatibility hash) to use the reference-based estimator on this grid.

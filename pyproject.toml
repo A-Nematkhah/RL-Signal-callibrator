@@ -1,0 +1,17 @@
+[project]
+name = "rlsignal"
+version = "0.1.0"
+description = "Learning-signal detection and Stage-II training-budget calibration for RL reward functions"
+requires-python = ">=3.10"
+dependencies = ["numpy", "scipy", "pandas", "pyyaml", "gymnasium"]
+
+[project.optional-dependencies]
+sb3 = ["stable-baselines3", "torch"]
+crowdnav = ["matplotlib", "cython", "cmake"]   # plus Python-RVO2 built from source, see README
+dev = ["pytest"]
+
+[project.scripts]
+rlsignal = "rlsignal.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["rlsignal*"]
