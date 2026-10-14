@@ -123,6 +123,14 @@ def _power_note(n_seeds, n_groups, params):
     return note
 
 
+LEGACY_LABEL = "LEGACY (superseded, kept for backward compatibility)"
+_METHOD_NAMES = {
+    "estimator": "reference-based estimator (`estimator` section, `rlsignal.estimator.estimate_budget`)",
+    "ranking": "legacy ranking mode (`ranking` section, `rlsignal.ranking.ranking_analysis`)",
+    "screening": "legacy screening mode (signal vs controls)",
+}
+
+
 def _snap(target, steps):
     cand = [t for t in steps if t >= target]
     return int(cand[0]) if cand else None
@@ -134,7 +142,13 @@ def recommend_budget(res, steps, cfg):
     signal beyond the controls is detected (max of their stable onsets) x safety margin."""
     mode = cfg.get("mode", "estimator" if res.get("estimator") else "ranking")
     margin = float(cfg.get("safety_margin", 1.5))
-    out = {"mode": mode, "minimum_reliable_budget": None, "recommended_stage2_steps": None, "reason": None}
+    out = {
+        "mode": mode,
+        "method": mode,
+        "minimum_reliable_budget": None,
+        "recommended_stage2_steps": None,
+        "reason": None,
+    }
     if mode == "estimator":
         d = (res.get("estimator") or {}).get("decision")
         if not d:
@@ -230,8 +244,20 @@ def write_report(res, man, out_dir):
             f"- {d['power_note']}",
         ]
     rk = res.get("ranking")
+    mode = res["budget"].get("mode")
+    superseded = mode != "ranking" and (mode == "estimator" or bool(res.get("estimator")))
     if rk:
-        L += ["", "## Ranking agreement with the horizon reference", ""]
+        if superseded:
+            L += [
+                "",
+                f"## {LEGACY_LABEL}: ranking agreement with the horizon reference",
+                "",
+                "Legacy `ranking` mode (fixed reference weights, tau on seed halves). It does NOT produce the budget "
+                "decision of this report; see the estimator section and the Budget section.",
+                "",
+            ]
+        else:
+            L += ["", "## Ranking agreement with the horizon reference", ""]
         if "tau_median" in rk:
             L += [
                 f"- reference step: {rk['reference_step']}; reference reliability (median tau between seed halves): "
@@ -242,7 +268,8 @@ def write_report(res, man, out_dir):
             ]
             for i, t in enumerate(rk["steps"]):
                 L.append(f"| {t} | {rk['tau_median'][i]:.2f} | {rk['frac_tau_ok'][i]:.2f} | {rk['p_top1'][i]:.2f} |")
-        L.append(f"- first agreeing budget: {rk['first']}, stable: {rk['stable']}; {rk['reason'] or ''}")
+        prefix = "LEGACY (not the decision) " if superseded else ""
+        L.append(f"- {prefix}first agreeing budget: {rk['first']}, stable: {rk['stable']}; {rk['reason'] or ''}")
     est = res.get("estimator")
     if est:
         L += _estimator_report(est)
@@ -251,6 +278,7 @@ def write_report(res, man, out_dir):
         "",
         "## Budget",
         "",
+        f"- decided by: {_METHOD_NAMES.get(b['mode'], b['mode'])}",
         f"- mode: {b['mode']}",
         f"- minimum_reliable_budget: {b['minimum_reliable_budget']}",
         f"- recommended_stage2_steps: {b['recommended_stage2_steps']}",

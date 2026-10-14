@@ -60,6 +60,10 @@ See `configs/crowdnav_pilot.yaml` for a fully documented example.
 
 ## Reading the report
 - **vs controls** is the quantity to trust. `None` = not detected within the tested budget (censored), never an invented number.
+- The `## Budget` section names the method that produced the decision (`decided by: ...`, also `budget.method` in
+  `analysis.json`). When the estimator decides, the legacy `ranking` block (if configured) is printed under a heading
+  marked **LEGACY (superseded, kept for backward compatibility)**; its "first agreeing / stable budget" is not the
+  estimator's result.
 - Recommended budget = minimum reliable budget x `safety_margin`, snapped up to a tested checkpoint (PPO trains in whole
   rollouts, so checkpoints are multiples of `n_envs * n_steps`). **Validate it** (hold-out section below): checkpoints of
   one long run only mimic a short run when nothing in training depends on the horizon (the SB3 trainer rejects LR schedules).
