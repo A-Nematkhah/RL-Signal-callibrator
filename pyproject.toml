@@ -15,3 +15,16 @@ rlsignal = "rlsignal.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["rlsignal*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+extend-exclude = ["CrowdNav", "results", "legacy_results", "experiments/pilot_v2_reanalysis"]
+
+[tool.ruff.lint]
+select = ["F", "E9", "B", "UP", "SIM", "PLE", "PLW"]
+# SIM300 misreads single-letter uppercase math names (S, C, T) as constants ("Yoda conditions").
+ignore = ["E501", "SIM108", "UP007", "B905", "SIM300"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
