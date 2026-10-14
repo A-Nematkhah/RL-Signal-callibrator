@@ -70,6 +70,44 @@ def test_refine_evaluates_snapshots_without_touching_the_training_run(tmp_path):
     assert rec["transitions"] == 96 and rec["refined_from_snapshot"]
 
 
+def test_refine_snaps_requested_steps_to_the_rollout_like_training_does(tmp_path):
+    cfg = cfg1()
+    exp, _ = run_experiment(cfg, tmp_path, log=lambda *_: None)
+    out = refine_experiment(cfg, tmp_path, [90, 170, 95], log=lambda *_: None)  # rollout 32: -> 96, 192, 96
+    assert not out["missing_snapshots"] and not out["mislabelled_snapshots"]
+    assert out["evaluated"] == 2 * 2 * 2
+    _, runs = load_experiment(exp)
+    assert {96, 192} <= set(runs["good"][0].eval_E) and {96, 192} <= set(runs["good"][0].probe)
+    assert not {90, 95, 170} & set(runs["good"][0].eval_E)
+    assert refine_experiment(cfg, tmp_path, [96, 192], log=lambda *_: None)["evaluated"] == 0
+
+
+def test_cli_refine_suggests_from_the_snapped_snapshot_grid(tmp_path, monkeypatch):
+    import yaml
+    from rlsignal import analyze, cli, estimator
+
+    cfg = cfg1()
+    cfg["schedule"]["snapshot_grid"] = [64, 90, 128, 170, 256]  # stored as ckpt_96 / ckpt_192 by training
+    cfg["estimator"] = {
+        "rule": "single",
+        "criteria": [{"name": "success", "source": "metric", "key": "success", "direction": "higher"}],
+    }
+    run_experiment(cfg, tmp_path, log=lambda *_: None)
+    p = tmp_path / "toy.yaml"
+    p.write_text(yaml.safe_dump(cfg), encoding="utf-8")
+    seen = {}
+    monkeypatch.setattr(analyze, "analyze_experiment", lambda *a, **k: {"estimator": {"decision": {}}})
+
+    def fake_suggest(est, snaps, max_new):
+        seen["snaps"] = list(snaps)
+        return []
+
+    monkeypatch.setattr(estimator, "suggest_refinement_steps", fake_suggest)
+    cli.main(["refine", str(p), "--out", str(tmp_path)])
+    assert seen["snaps"] == [64, 96, 128, 192, 256]
+    assert runner.snapshot_steps(cfg) == [64, 96, 128, 192, 256]
+
+
 def test_refine_skips_a_mislabelled_snapshot_without_writing_anything(tmp_path):
     cfg = cfg1()
     exp, _ = run_experiment(cfg, tmp_path, log=lambda *_: None)

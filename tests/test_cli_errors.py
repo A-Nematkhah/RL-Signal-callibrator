@@ -57,7 +57,7 @@ def test_analyze_missing_experiment_dir_exits_2(tmp_path, capsys):
 
 
 def test_max_refine_in_estimator_section_loads_and_is_used(tmp_path, monkeypatch):
-    from rlsignal import analyze, estimator
+    from rlsignal import analyze, estimator, runner
     from rlsignal.config import load_config
     from rlsignal.params import EstimatorParams
 
@@ -73,6 +73,7 @@ def test_max_refine_in_estimator_section_loads_and_is_used(tmp_path, monkeypatch
     (exp / "manifest.json").write_text(json.dumps({"name": "toy"}), encoding="utf-8")
     seen = {}
     monkeypatch.setattr(analyze, "analyze_experiment", lambda *a, **k: {"estimator": {"decision": {}}})
+    monkeypatch.setattr(runner, "snapshot_steps", lambda cfg: [32, 64])
 
     def fake_suggest(est, snaps, max_new):
         seen["max_new"] = max_new

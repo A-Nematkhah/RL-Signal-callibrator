@@ -225,12 +225,26 @@ def estimate_cost(cfg, n_transitions=1024, log=print):
     }
 
 
+def _rollout_size(cfg, adapter) -> int:
+    rid = next(iter(cfg["rewards"]))
+    return build_trainer(cfg, adapter, cfg["rewards"][rid], cfg["schedule"]["seeds"][0]).rollout_size
+
+
+def snapshot_steps(cfg) -> list:
+    """schedule.snapshot_grid as stored by training, i.e. snapped up to whole rollouts."""
+    grid = cfg["schedule"].get("snapshot_grid") or []
+    return checkpoint_grid(grid, _rollout_size(cfg, build_adapter(cfg))) if grid else []
+
+
 def refine_experiment(cfg, out_root, steps, log=print):
     """Coarse-to-fine EVALUATION: evaluate additional budgets from stored snapshots (schedule.snapshot_grid /
     keep_snapshots). Nothing is trained and the main run's model, optimiser and RNG are never touched: a fresh
-    trainer loads the snapshot and is discarded. Records use the same format as ordinary checkpoints."""
+    trainer loads the snapshot and is discarded. Records use the same format as ordinary checkpoints.
+    Requested steps are snapped up to whole rollouts, exactly as training snaps the grid it saves snapshots at."""
     exp = Path(out_root) / cfg["name"]
     adapter = build_adapter(cfg)
+    rollout = _rollout_size(cfg, adapter)
+    steps = list(dict.fromkeys(snap_to_batch(s, rollout) for s in steps if s > 0))
     man = json.loads((exp / "manifest.json").read_text(encoding="utf-8"))
     kind, n_act = man["env_info"]["action_kind"], man["env_info"]["n_actions"]
     ev, pcfg = cfg["eval"], cfg.get("behavior_probe") or {}
@@ -249,12 +263,9 @@ def refine_experiment(cfg, out_root, steps, log=print):
                     continue
                 tr = build_trainer(cfg, adapter, rspec, seed)
                 tr.load(str(snap))
-                expected = snap_to_batch(step, tr.rollout_size)
-                if tr.transitions != expected:
+                if tr.transitions != step:
                     mislabelled.append(str(snap))
-                    log(
-                        f"[skip] {snap}: snapshot holds {tr.transitions} transitions, expected {expected}; not evaluated"
-                    )
+                    log(f"[skip] {snap}: snapshot holds {tr.transitions} transitions, expected {step}; not evaluated")
                     continue
                 eps = evaluate_policy(
                     tr,
