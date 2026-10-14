@@ -35,6 +35,9 @@ eval:
 schedule:
   seeds: [0, 1, 2, 3, 4, 5, 6, 7]        # >= 8 seeds: bootstrap CIs and rank statistics need them
   checkpoints: [2048, 4096, 8192, 16384, 32768, 65536, 100000, 150000, 200000, 300000]
+  # Fine grid near the success-ranking stop (P(tau>=thr) jumps between 8192 and 16384). Snapped to rollout=1024.
+  # Needed for `rlsignal refine`; must be set BEFORE training so snapshots exist.
+  snapshot_grid: [10240, 12288, 14336, 20480, 24576, 28672]
 compute:
   max_wall_seconds: null
   workers: 6
@@ -66,9 +69,9 @@ budget:
 # ---------------------------------------------------------------------------------------------------------------
 # Reference-based estimator (v2). These sections are NOT part of the compatibility hash: re-analysing stored results
 # with other thresholds is always allowed. All values are documented placeholders to calibrate, not universal truths.
-# Pre-registered ranking rule: Pareto dominance over (success: higher is better, collision: lower is better). Replace by
-# `rule: single` with only the success criterion to rank on success alone (collision-free-but-frozen policies then
-# no longer count as incomparable to successful ones).
+# Ranking rule: success alone (`rule: single`). Pareto over (success, collision) put frozen policies
+# (near-zero collision via timeout) on the same front as successful ones and made the reference ranking
+# irreproducible on the first pilot; keep that analysis secondary if needed.
 reference:                               # applied by `run` for NEW experiments
   budget: 300000                         # snapped up to a rollout multiple; default = largest checkpoint
   n_episodes: 100                        # larger evaluation of the reference policies (eval_set "R"), disjoint scenarios
@@ -79,10 +82,9 @@ behavior_probe:                          # policy fingerprints on fixed probe st
   seed_base: 20000
   stride: 3
 estimator:
-  rule: pareto                           # single | weighted | pareto
+  rule: single                           # single | weighted | pareto
   criteria:
-    - {name: success,   source: metric, key: success,   direction: higher}
-    - {name: collision, source: metric, key: collision, direction: lower}
+    - {name: success, source: metric, key: success, direction: higher}
   n_boot: 500
   n_exp_seeds: null                      # null -> half of the seeds act as the "experiment"; the other half is the reference
   tau_threshold: 0.6
