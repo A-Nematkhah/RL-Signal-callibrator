@@ -1,0 +1,65 @@
+"""estimate / analyze / refine must exit 2 with a one-line error, not a raw traceback."""
+
+import json
+
+import pytest
+import yaml
+
+from rlsignal import cli
+
+
+def _cfg(tmp_path, name="toy", estimator=True, schedule=None):
+    c = {
+        "name": name,
+        "adapter": {"name": "toy"},
+        "rewards": {"a": {"weights": {}}},
+        "algo": {"name": "dummy"},
+        "eval": {"n_episodes": 1, "eval_seed_base": 0, "n_null_sets": 0},
+        "schedule": schedule or {"seeds": [0], "checkpoints": [64]},
+    }
+    if estimator:
+        c["estimator"] = {
+            "rule": "single",
+            "criteria": [{"name": "success", "source": "metric", "key": "success", "direction": "higher"}],
+        }
+    p = tmp_path / f"{name}.yaml"
+    p.write_text(yaml.safe_dump(c), encoding="utf-8")
+    return p
+
+
+def _run(argv, capsys):
+    with pytest.raises(SystemExit) as e:
+        cli.main(argv)
+    return e.value.code, capsys.readouterr()
+
+
+def test_estimate_missing_experiment_dir_exits_2(tmp_path, capsys):
+    cfg = _cfg(tmp_path)
+    code, out = _run(["estimate", str(cfg), "--out", str(tmp_path)], capsys)
+    assert code == 2
+    assert "experiment directory" in out.err.lower()
+    assert "Traceback" not in out.err
+
+
+def test_estimate_missing_estimator_section_exits_2(tmp_path, capsys):
+    cfg = _cfg(tmp_path, estimator=False)
+    exp = tmp_path / "toy"
+    exp.mkdir()
+    (exp / "manifest.json").write_text(json.dumps({"name": "toy"}), encoding="utf-8")
+    code, out = _run(["estimate", str(cfg), "--out", str(tmp_path)], capsys)
+    assert code == 2 and "estimator" in out.err.lower() and "Traceback" not in out.err
+
+
+def test_analyze_missing_experiment_dir_exits_2(tmp_path, capsys):
+    cfg = _cfg(tmp_path)
+    code, out = _run(["analyze", str(cfg), "--out", str(tmp_path)], capsys)
+    assert code == 2 and "experiment directory" in out.err.lower()
+
+
+def test_refine_without_snapshot_grid_exits_2(tmp_path, capsys):
+    cfg = _cfg(tmp_path)
+    exp = tmp_path / "toy"
+    exp.mkdir()
+    (exp / "manifest.json").write_text(json.dumps({"name": "toy"}), encoding="utf-8")
+    code, out = _run(["refine", str(cfg), "--out", str(tmp_path)], capsys)
+    assert code == 2 and "snapshot" in out.err.lower() and "Traceback" not in out.err
