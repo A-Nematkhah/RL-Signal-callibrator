@@ -76,6 +76,7 @@ class EstimatorParams:
     min_seeds: int = 6
     min_eval_episodes: int = 30
     safety_margin: float = 1.5
+    max_refine: int = 3  # `refine`: at most this many new snapshot budgets are evaluated per invocation
     # ---- reference policies
     reference_budget: int | None = None  # None -> largest evaluated budget
     require_stable_reference: bool = True  # legacy switch: False == uncertain_reference 'ignore_with_flag'

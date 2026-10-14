@@ -118,8 +118,10 @@ The recommended budget answers (3) only, and only if (4) allows it.
 
 **Coarse-to-fine evaluation without retraining.** Set `schedule.snapshot_grid` (fine) while `schedule.checkpoints`
 stays coarse; `rlsignal refine <config>` evaluates extra snapshots near the stopping boundary in a fresh trainer,
-never touching the training run. A grid point inserted *behind* a run's trained frontier is skipped with a message
-(evaluating it would label the later model with the earlier budget).
+never touching the training run. At most `estimator.max_refine` (default 3) new budgets are evaluated per call.
+A grid point inserted *behind* a run's trained frontier is skipped with a message
+(evaluating it would label the later model with the earlier budget); likewise, a snapshot whose loaded model does
+not hold the requested (rollout-snapped) number of transitions is skipped and listed in `mislabelled_snapshots`.
 
 **Not claimed.** No policy is declared optimal/converged because of its budget, plateau, or similarity to a reference.
 Budgets are conditional on the design (seeds, episodes, rule). Defaults are placeholders to calibrate —

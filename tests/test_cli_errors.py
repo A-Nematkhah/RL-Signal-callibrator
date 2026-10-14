@@ -56,6 +56,33 @@ def test_analyze_missing_experiment_dir_exits_2(tmp_path, capsys):
     assert code == 2 and "experiment directory" in out.err.lower()
 
 
+def test_max_refine_in_estimator_section_loads_and_is_used(tmp_path, monkeypatch):
+    from rlsignal import analyze, estimator
+    from rlsignal.config import load_config
+    from rlsignal.params import EstimatorParams
+
+    cfg = _cfg(tmp_path, schedule={"seeds": [0], "checkpoints": [64], "snapshot_grid": [32, 64]})
+    c = yaml.safe_load(cfg.read_text(encoding="utf-8"))
+    c["estimator"]["max_refine"] = 5
+    cfg.write_text(yaml.safe_dump(c), encoding="utf-8")
+    assert EstimatorParams.from_cfg(load_config(cfg)["estimator"]).max_refine == 5
+    assert EstimatorParams().max_refine == 3
+
+    exp = tmp_path / "toy"
+    exp.mkdir()
+    (exp / "manifest.json").write_text(json.dumps({"name": "toy"}), encoding="utf-8")
+    seen = {}
+    monkeypatch.setattr(analyze, "analyze_experiment", lambda *a, **k: {"estimator": {"decision": {}}})
+
+    def fake_suggest(est, snaps, max_new):
+        seen["max_new"] = max_new
+        return []
+
+    monkeypatch.setattr(estimator, "suggest_refinement_steps", fake_suggest)
+    cli.main(["refine", str(cfg), "--out", str(tmp_path)])
+    assert seen["max_new"] == 5
+
+
 def test_refine_without_snapshot_grid_exits_2(tmp_path, capsys):
     cfg = _cfg(tmp_path)
     exp = tmp_path / "toy"

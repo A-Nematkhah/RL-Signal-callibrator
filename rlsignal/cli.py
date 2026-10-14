@@ -74,6 +74,7 @@ def main(argv=None):
     if a.cmd == "refine":
         from .analyze import analyze_experiment
         from .estimator import suggest_refinement_steps
+        from .params import EstimatorParams
         from .runner import refine_experiment
 
         exp = _require_experiment(cfg, a.out)
@@ -90,7 +91,7 @@ def main(argv=None):
             _die(f"refine: analysis of {exp} failed: {e}")
         if not res.get("estimator"):
             _die("refine: analysis produced no estimator section")
-        steps = suggest_refinement_steps(res["estimator"], snaps, max_new=int(est_cfg.get("max_refine", 3)))
+        steps = suggest_refinement_steps(res["estimator"], snaps, max_new=EstimatorParams.from_cfg(est_cfg).max_refine)
         print("refining budgets:", steps)
         if steps:
             out = refine_experiment(cfg, a.out, steps)
