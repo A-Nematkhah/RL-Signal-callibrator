@@ -351,6 +351,43 @@ def ranking_reliability(runs, steps, candidates, criteria, ref_step, P, exclude=
     out["stable_step_nominal"] = stable_of(nominal)
     out["stable_step_bonferroni"] = stable_of(adjusted)
 
+    # ---- can the tightened criterion pass at all? The reference budget is the documented agreement ceiling.
+    def unmet_at_reference(prob, pair_p, top_threshold):
+        unmet = []
+        if use_tau and frac_ok[ref_idx_t] < prob:
+            unmet.append({"criterion": "P(tau>=thr)", "reachable": float(frac_ok[ref_idx_t]), "required": float(prob)})
+        if resolved:
+            fr = float((pair_agree[ref_idx_t] >= pair_p).mean())
+            if fr < P.pair_fraction:
+                unmet.append(
+                    {
+                        "criterion": f"fraction of resolved pairs reproduced with prob >= {pair_p:.3f}",
+                        "reachable": fr,
+                        "required": float(P.pair_fraction),
+                    }
+                )
+        if top_threshold is not None and top_prob[ref_idx_t] < top_threshold:
+            unmet.append(
+                {
+                    "criterion": "P(best in ref top set)",
+                    "reachable": float(top_prob[ref_idx_t]),
+                    "required": float(top_threshold),
+                }
+            )
+        return unmet
+
+    unmet = unmet_at_reference(p_adj, pp_adj, top_adj) if resolved else []
+    attainable = None if not resolved else (not unmet or out["stable_step_bonferroni"] is not None)
+    out["bonferroni_attainable"] = attainable
+    out["looks"]["bonferroni_unattainable"] = [] if attainable else unmet
+    if attainable is False and out["status"] == "ok" and nominal[ref_idx_t]:
+        out["notes"].append(
+            "the Bonferroni-tightened criterion cannot be met even at the reference budget with this design ("
+            + "; ".join(f"{u['criterion']}: {u['reachable']:.3f} < {u['required']:.3f}" for u in unmet)
+            + "): its missing stable budget is not evidence against any budget. More seeds or evaluation episodes, "
+            "or fewer eligible looks, are needed for that check"
+        )
+
     # ---- reference reproducibility ceiling: experiment at the reference budget vs the (disjoint-seed) reference
     ceil_ok = bool(nominal[ref_idx_t]) if out["status"] == "ok" else False
     out["reference_reproducibility"] = {

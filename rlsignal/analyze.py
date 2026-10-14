@@ -334,8 +334,20 @@ def _estimator_report(est):
         L.append(
             f"\n- reference ranking resolves {rr['n_resolved_pairs']}/{rr['n_pairs']} pairs; top set: {rr['top_set']}"
         )
+        unmet = rk["looks"].get("bonferroni_unattainable") or []
+        if rk.get("bonferroni_attainable") is False and unmet:
+            bonf = (
+                "not attainable with this design ("
+                + "; ".join(
+                    f"max reachable agreement {u['reachable']:.2f} < required {u['required']:.2f} for {u['criterion']}"
+                    for u in unmet
+                )
+                + ")"
+            )
+        else:
+            bonf = str(rk["stable_step_bonferroni"])
         L.append(
-            f"- stable budget: nominal {rk['stable_step_nominal']}, Bonferroni-tightened {rk['stable_step_bonferroni']} "
+            f"- stable budget: nominal {rk['stable_step_nominal']}, Bonferroni-tightened {bonf} "
             f"(over {rk['looks']['n_eligible_looks']} looks)"
         )
     L += [

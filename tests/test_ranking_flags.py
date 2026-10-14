@@ -55,6 +55,28 @@ def test_explicit_top_threshold_reproduces_the_old_flags(name):
     assert rk["per_step"]["agree_bonferroni"] == _old_flags(rk, P, p_adj, pp_adj)
 
 
+def test_unattainable_bonferroni_is_reported_as_such_not_as_missing_evidence(tmp_path):
+    r, _ = _estimate([0.1, 0.3, 0.5, 0.7, 0.9], {}, seed=2)
+    rk = r["ranking"]
+    assert rk["status"] == "ok" and rk["stable_step_nominal"] is not None  # nominal rule unchanged
+    assert rk["stable_step_bonferroni"] is None
+    assert rk["bonferroni_attainable"] is False
+    fails = rk["looks"]["bonferroni_unattainable"]
+    assert fails and all(f["reachable"] < f["required"] for f in fails)
+    from rlsignal.analyze import _estimator_report
+
+    text = "\n".join(_estimator_report(r))
+    assert "Bonferroni-tightened not attainable with this design (max reachable agreement" in text
+    assert "< required" in text
+
+
+def test_attainable_bonferroni_keeps_the_stable_step():
+    r, _ = _estimate([0.1, 0.3, 0.5, 0.7, 0.9], {}, seed=1)
+    rk = r["ranking"]
+    assert rk["bonferroni_attainable"] is True and rk["stable_step_bonferroni"] is not None
+    assert rk["looks"]["bonferroni_unattainable"] == []
+
+
 def test_top_set_thresholds_are_published():
     r, P = _estimate([0.1, 0.3, 0.5, 0.7, 0.9], {})
     looks = r["ranking"]["looks"]
