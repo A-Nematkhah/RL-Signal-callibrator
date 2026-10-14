@@ -4,6 +4,19 @@ environment -- they are NOT claimed to be universally correct."""
 
 from __future__ import annotations
 from dataclasses import dataclass, field, fields
+from difflib import get_close_matches
+
+
+def reject_unknown_keys(section, given, known):
+    """Raise ValueError listing unknown keys and close matches (typos like `uncertian_reference`)."""
+    unknown = sorted(set(given) - set(known))
+    if not unknown:
+        return
+    hints = []
+    for k in unknown:
+        close = get_close_matches(k, list(known), n=3, cutoff=0.5)
+        hints.append(f"{k!r} (did you mean {close}?)" if close else repr(k))
+    raise ValueError(f"unknown key(s) in {section}: " + ", ".join(hints))
 
 
 @dataclass
@@ -89,6 +102,7 @@ class EstimatorParams:
     def from_cfg(cls, d):
         d = dict(d or {})
         names = {f.name for f in fields(cls)}
+        reject_unknown_keys("estimator", d, names)
         kw = {k: v for k, v in d.items() if k in names and k != "criteria"}
         if d.get("criteria") is not None:
             kw["criteria"] = [c if isinstance(c, Criterion) else Criterion(**c) for c in d["criteria"]]

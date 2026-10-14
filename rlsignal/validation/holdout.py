@@ -41,6 +41,13 @@ DEFAULT_TARGETS = {
 }
 
 
+def validate_holdout_targets(targets):
+    from ..params import reject_unknown_keys
+
+    reject_unknown_keys("holdout.targets", targets, DEFAULT_TARGETS)
+    return {**DEFAULT_TARGETS, **targets}
+
+
 def _digest(obj):
     return hashlib.sha256(json.dumps(obj, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
@@ -157,7 +164,7 @@ def preregister_holdout(cfg, out_root, force=False):
     truth = reference_truth(runs, cands, criteria, ref_step, P, exclude=excluded)
     payload = {
         "holdout": hc,
-        "targets": {**DEFAULT_TARGETS, **hc.get("targets", {})},
+        "targets": validate_holdout_targets(hc.get("targets", {})),
         "reference": {
             "name": ref_cfg["name"],
             "compat_hash": compat_hash(ref_cfg),
