@@ -161,6 +161,16 @@ def test_workflow_preregister_run_validate_and_tamper_detection(toy, tmp_path):
         validate_holdout(hold, tmp_path)
 
 
+def test_holdout_without_null_bank_is_loaded_and_validated(toy, tmp_path):
+    ref, hold = _cfgs(tmp_path)
+    hold["eval"]["n_null_sets"] = 0  # as in configs/crowdnav_holdout.yaml
+    run_experiment(ref, tmp_path, log=lambda *_: None)
+    preregister_holdout(hold, tmp_path)
+    run_experiment(hold, tmp_path, log=lambda *_: None)
+    doc = validate_holdout(hold, tmp_path)
+    assert set(doc["claim_supported"]) == {"64", "128"}
+
+
 def test_overlapping_seeds_cannot_be_registered(toy, tmp_path):
     ref, hold = _cfgs(tmp_path)
     run_experiment(ref, tmp_path, log=lambda *_: None)

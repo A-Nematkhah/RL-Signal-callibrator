@@ -72,6 +72,7 @@ def load_experiment(exp_dir):
     exp = Path(exp_dir)
     man = json.loads((exp / "manifest.json").read_text(encoding="utf-8"))
     runs = {}
+    n_null = int(((man.get("config") or {}).get("eval") or {}).get("n_null_sets", 8))
     for rdir in sorted((exp / "runs").glob("*/seed*")):
         f = rdir / "evals.jsonl"
         if not f.exists():
@@ -90,7 +91,7 @@ def load_experiment(exp_dir):
                                       "This format is not valid for the matched null design; re-run the experiment.")
             else:
                 nulls[int(rec["null_idx"])] = rec["episodes"]
-        if 0 in E and nulls:
+        if 0 in E and (nulls or n_null == 0):
             reward, seed = rdir.parent.name, int(rdir.name.replace("seed", ""))
             probe = {}
             for pf in sorted((rdir / "probe").glob("ckpt_*.npy")) if (rdir / "probe").exists() else []:
