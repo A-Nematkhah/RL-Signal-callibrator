@@ -1,0 +1,106 @@
+# PILOT v3 for CrowdNav. Same environment and PPO setup as configs/crowdnav_pilot.yaml (v2); differences:
+#   * candidates chosen by configs/crowdnav_screen.yaml so that success spreads from ~0 to ~0.85 at 300k steps
+#     (v2 had 5 of 7 candidates at success 0, so its ranking only separated "2 good" from "the rest");
+#   * 12 seeds (6 experiment / 6 reference) and 50 evaluation episodes, so the Bonferroni-tightened check is reachable.
+name: crowdnav_pilot_v3
+adapter:
+  name: crowdnav
+  kinematics: holonomic
+  n_speeds: 5
+  n_rotations: 16
+  obs_mode: ego
+  env_config:
+    sim: {human_num: 3}
+rewards:
+  # ---- candidates; screening success at 300k (2 seeds) in brackets
+  progress_weak:       {weights: {goal_progress: 0.1, success: 1.0, collision: -1.0}}               # [0.83, slow start]
+  progress_only:       {weights: {goal_progress: 1.0}}                                               # [0.77]
+  progress_cautious:   {weights: {goal_progress: 1.0, success: 1.0, collision: -5.0}}               # [0.75]
+  goal_shaping:        {weights: {goal_progress: 1.0, success: 1.0, collision: -1.0}}               # [0.65]
+  progress_mild_noise: {weights: {goal_progress: 1.0, success: 1.0, collision: -1.0, noise: 0.25}}  # [not screened]
+  progress_noisy:      {weights: {goal_progress: 1.0, success: 1.0, collision: -1.0, noise: 0.5}}   # [0.19]
+  progress_fearful:    {weights: {goal_progress: 1.0, success: 1.0, collision: -20.0}}              # [0.15]
+  reckless_fast:       {weights: {goal_progress: 1.0, speed: 0.1, collision: -0.01}}                # [0.02]
+  # ---- negative controls: they define the drift level a real signal has to exceed
+  null_control:        {weights: {}}
+  random_control:      {weights: {noise: 0.1}}
+algo:
+  name: ppo_sb3
+  n_envs: 8
+  hyperparams: {n_steps: 128, batch_size: 128, n_epochs: 10, learning_rate: 0.0003, gamma: 0.99, ent_coef: 0.01}
+eval:
+  n_episodes: 50
+  eval_seed_base: 10000
+  n_null_sets: 8
+  eval_rng_seed: 12345
+  deterministic: false
+schedule:
+  seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  checkpoints: [2048, 4096, 8192, 16384, 32768, 65536, 100000, 150000, 200000, 300000]
+  # slow learners (progress_weak) move the stopping boundary later than in v2, so the fine grid extends to 80k
+  snapshot_grid: [10240, 12288, 14336, 20480, 24576, 28672, 40960, 49152, 57344, 81920]
+compute:
+  max_wall_seconds: null
+  workers: 6
+features:
+  exclude: [terminated, m_timeout, act_distinct_frac]
+detection:
+  alpha: 0.05
+  q: 0.6667
+  persist_k: 2
+  persist_ratio: 2.0
+  n_perm: 499
+  null_quantile: 0.95
+  delta_l: 0.25
+  n_boot: 300
+  discrim_alpha: 0.05
+  discrim_n_perm: 2000
+  min_sep_ratio: 1.25
+  discrim_correction: none
+  min_seeds_ci: 6
+  control_rewards: [null_control, random_control]
+ranking:
+  reference_weights: {success: 1.0, collision: -0.25, discomfort: -0.025}
+  tau_threshold: 0.6
+  prob: 0.8
+  n_boot: 400
+budget:
+  mode: estimator
+  safety_margin: 1.5
+reference:
+  budget: 300000
+  n_episodes: 100
+  eval_seed_base: 50000
+behavior_probe:
+  enabled: true
+  n_states: 64
+  seed_base: 20000
+  stride: 3
+estimator:
+  rule: single
+  criteria:
+    - {name: success, source: metric, key: success, direction: higher}
+  n_boot: 500
+  n_exp_seeds: null                      # 12 seeds -> 6 experiment / 6 reference
+  tau_threshold: 0.6
+  prob: 0.8
+  resolve_prob: 0.9
+  pair_prob: 0.8
+  pair_fraction: 0.9
+  top_set_prob: 0.8
+  persist_k: 2
+  persist_ratio: 2.0
+  looks_correction: none
+  min_reference_ratio: 3.0
+  min_seeds: 6
+  min_eval_episodes: 30
+  safety_margin: 1.5
+  uncertain_reference: exclude_pairs
+  ref_max_between_seed_sd: 0.15
+  ref_max_probe_js: 0.15
+  ref_trend_fraction: 0.5
+  ref_max_trend: 0.05
+  ref_behavior_blocks: false
+  behavior_metrics: [probe_js, action_marginal_js, feature_energy, task_gap]
+  behavior_threshold_mode: floor_relative
+  behavior_floor_factor: 1.0

@@ -1,0 +1,38 @@
+# Cheap candidate screening (2 seeds) to pick rewards whose success spreads between 0 and ~0.8 at 300k steps.
+# Training setup equals configs/crowdnav_pilot.yaml; only the reward set and the schedule differ.
+name: crowdnav_screen
+adapter:
+  name: crowdnav
+  kinematics: holonomic
+  n_speeds: 5
+  n_rotations: 16
+  obs_mode: ego
+  env_config:
+    sim: {human_num: 3}
+rewards:
+  goal_shaping:        {weights: {goal_progress: 1.0, success: 1.0, collision: -1.0}}
+  progress_only:       {weights: {goal_progress: 1.0}}
+  progress_weak:       {weights: {goal_progress: 0.1, success: 1.0, collision: -1.0}}
+  progress_tiny:       {weights: {goal_progress: 0.03, success: 1.0, collision: -1.0}}
+  progress_cautious:   {weights: {goal_progress: 1.0, success: 1.0, collision: -5.0}}
+  progress_fearful:    {weights: {goal_progress: 1.0, success: 1.0, collision: -20.0}}
+  progress_noisy:      {weights: {goal_progress: 1.0, success: 1.0, collision: -1.0, noise: 0.5}}
+  progress_very_noisy: {weights: {goal_progress: 1.0, success: 1.0, collision: -1.0, noise: 2.0}}
+  progress_speed:      {weights: {goal_progress: 0.5, speed: 0.2, success: 1.0, collision: -1.0}}
+  reckless_fast:       {weights: {goal_progress: 1.0, speed: 0.1, collision: -0.01}}
+algo:
+  name: ppo_sb3
+  n_envs: 8
+  hyperparams: {n_steps: 128, batch_size: 128, n_epochs: 10, learning_rate: 0.0003, gamma: 0.99, ent_coef: 0.01}
+eval:
+  n_episodes: 50
+  eval_seed_base: 90000
+  n_null_sets: 0
+  eval_rng_seed: 777
+  deterministic: false
+schedule:
+  seeds: [500, 501]
+  checkpoints: [16384, 65536, 300000]
+compute:
+  max_wall_seconds: null
+  workers: 6

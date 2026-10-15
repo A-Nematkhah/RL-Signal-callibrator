@@ -100,7 +100,8 @@ estimator:
   min_seeds: 6
   min_eval_episodes: 30
   safety_margin: 1.5
-  uncertain_reference: block             # block | exclude_pairs | ignore_with_flag
+  uncertain_reference: exclude_pairs     # block | exclude_pairs | ignore_with_flag
+                                         # success_collision references are bimodal (1/8 seeds learns); `block` stops everything
   ref_max_between_seed_sd: 0.15
   ref_max_probe_js: 0.15
   ref_trend_fraction: 0.5
